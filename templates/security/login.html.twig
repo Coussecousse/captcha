@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Se connecter!{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <div class="screen">
+        <div class="screen__content">
+            <h1 class="">Se connecter</h1>
+            {% if error %}
+                <div class="alert alert-danger" style="tex-align: center; margin-top: 1rem">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            {% endif %}
+
+            {% if app.user %}
+                <div class="mb-3" style="text-align: center; margin-top: 1rem;">
+                Vous êtes connecté comme {{ app.user.userIdentifier }},<br> <a href="{{ path('app_logout') }}">Se déconnecter</a>
+                </div>
+            {% endif %}
+			<form class="login" method="POST">
+				<div class="login__field">
+					<i class="login__icon fas fa-user"></i>
+					<input type="text" class="login__input" name="_username" id="username" autocomplete="username" placeholder="Pseudo">
+				</div>
+				<div class="login__field">
+					<i class="login__icon fas fa-lock"></i>
+					<input type="password" class="login__input" placeholder="Mot de passe" name="_password" id="password">
+				</div>
+                <input type="hidden" name="_csrf_token"
+               value="{{ csrf_token('authenticate') }}">
+				<button class="button login__submit" type="submit">
+					<span class="button__text">Se connecter</span>
+					<i class="button__icon fas fa-chevron-right"></i>
+				</button>				
+			</form>
+		</div>
+		<div class="screen__background">
+			<span class="screen__background__shape screen__background__shape4"></span>
+			<span class="screen__background__shape screen__background__shape3"></span>		
+			<span class="screen__background__shape screen__background__shape2"></span>
+			<span class="screen__background__shape screen__background__shape1"></span>
+		</div>		
+	</div>
+</div>
+{% endblock %}
