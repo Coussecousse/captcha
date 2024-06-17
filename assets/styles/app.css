@@ -22,7 +22,7 @@ body {
 	background: linear-gradient(90deg, #5D54A4, #7C78B8);		
 	position: relative;	
 	height: 600px;
-	width: 360px;	
+	width: 450px;	
 	box-shadow: 0px 0px 24px #5C5696;
 }
 
@@ -185,4 +185,49 @@ h1 {
 
 .social-login__icon:hover {
 	transform: scale(1.5);	
+}
+
+/* Errors */
+.form__error {
+	color: #FF0000;
+	font-size: 15px;
+}
+.form__error > ul {
+	list-style: none;;
+}
+
+/* Captcha */
+.captcha {
+	display: block;
+	position: relative;
+	margin: 0 auto;
+	border: 2px solid #D1D1D4;
+	width: var(--width);
+	height: var(--height);
+	background: var(--image);
+	touch-action: none;
+}
+
+.captcha-piece {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: var(--pieceWidth);
+	height: var(--pieceHeight);
+	background: var(--image) top right;
+	/* background: url(/assets/image/piece_border.png); */
+	}
+	
+.captcha-piece::after {
+	background: url(/image/piece_border.png) center/100% 100% no-repeat;
+	content: '';
+	position: absolute;
+	width: calc(var(--pieceWidth) - 5px);
+	height: calc(var(--pieceHeight) - 5px);
+	transform: translate(2px, 2px);
+	transition: .3s
+}
+
+.captcha:not(.captcha-waiting-interaction) .captcha-piece:not(.is-moving)::after  {
+	opacity: 0;
 }

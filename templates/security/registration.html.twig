@@ -1,16 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Se connecter!{% endblock %}
+{% block title %}S'enregistrer{% endblock %}
 
 {% block body %}
 
 <div class="container">
     <div class="screen">
         <div class="screen__content">
-            <h1 class="">Se connecter</h1>
-            {% if error %}
-                <div class="alert alert-danger" style="tex-align: center; margin-top: 1rem">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-            {% endif %}
+            <h1 class="">S'enregistrer</h1>
 
             {% if app.user %}
                 <div class="mb-3" style="text-align: center; margin-top: 1rem;">
@@ -18,10 +15,13 @@
                 </div>
             {% endif %}
 			{{ form_start(form, { method: 'POST', attr: {'class': 'login'}}) }}
+                <div class="form__error">
+                    {{ form_errors(form) }}	
+                </div>
 				<div class="login__field">
 					<i class="login__icon fas fa-user"></i>
 
-					{{ form_widget(form.username, {value: last_username}) }}
+					{{ form_widget(form.username) }}
 					{{ form_errors(form.username) }}
 				</div>
 				<div class="login__field">
@@ -32,9 +32,9 @@
 				</div>
 				{{ form_rest(form) }}
 				<button class="button login__submit" type="submit">
-					<span class="button__text">Se connecter</span>
+					<span class="button__text">S'inscrire</span>
 					<i class="button__icon fas fa-chevron-right"></i>
-				</button>				
+				</button>			
 			{{ form_end(form) }}
 		</div>
 		<div class="screen__background">

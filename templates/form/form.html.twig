@@ -1,0 +1,17 @@
+{% block captcha_row %}
+<div class="form-group">
+    <puzzle-captcha 
+        {% for attrname, attrvalue in attr %}
+            {{ ( " " ~ attrname ~ "=\"" ~ attrvalue ~ "\"" )|raw('html') }}
+        {% endfor %}
+    >
+    {% for child in form.children %}
+        {{ form_widget(child) }}
+    {% endfor %}
+    </puzzle-captcha>
+    <div class="form__error">
+        {{ form_errors(form) }}
+    </div>
+</div>
+
+{% endblock %}

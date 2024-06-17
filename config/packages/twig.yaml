@@ -1,4 +1,6 @@
 twig:
+    form_themes:
+        - 'form/form.html.twig'
     file_name_pattern: '*.twig'
 
 when@test:
