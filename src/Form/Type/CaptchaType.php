@@ -2,7 +2,7 @@
 
 namespace App\Form\Type;
 
-use App\Domain\AntiSpam\ChallengeInterface;
+use App\Domain\AntiSpam\CaptchaInterface;
 use App\Domain\AntiSpam\Puzzle\PuzzleChallenge;
 use App\Validator\Challenge;
 use Symfony\Component\Form\AbstractType;
@@ -18,7 +18,7 @@ use Symfony\Component\Validator\Constraints\NotNull;
 class CaptchaType extends AbstractType
 {
 
-    public function __construct(private readonly ChallengeInterface $challenge, private readonly UrlGeneratorInterface $urlGenerator) {}
+    public function __construct(private readonly CaptchaInterface $challenge, private readonly UrlGeneratorInterface $urlGenerator) {}
 
     public function configureOptions(OptionsResolver $resolver): void 
     {

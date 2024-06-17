@@ -2,11 +2,11 @@
 
 namespace App\Domain\AntiSpam\Puzzle;
 
-use App\Domain\AntiSpam\ChallengeGenerator;
+use App\Domain\AntiSpam\CaptchaGenerator;
 use Intervention\Image\ImageManager;
 use Symfony\Component\HttpFoundation\Response;
 
-class PuzzleGenerator implements ChallengeGenerator
+class PuzzleGenerator implements CaptchaGenerator
 {
     public function __construct(private readonly PuzzleChallenge $challenge) {
 
@@ -22,17 +22,19 @@ class PuzzleGenerator implements ChallengeGenerator
         [$x, $y] = $position;
         $backgroundPath = sprintf('%s/kitten.webp', __DIR__);
         $piecePath = sprintf('%s/piece.png', __DIR__);
-        // dd($piecePath);
 
         $manager = new ImageManager(['driver' => 'gd']);
         $image = $manager->make($backgroundPath);
         $piece = $manager->make($piecePath);
-        $piece->resize(PuzzleChallenge::PIECE_WIDTH, PuzzleChallenge::PIECE_HEIGHT);
+        // $piece->scale(width: PuzzleChallenge::PIECE_WIDTH);
+        $piece->fit(PuzzleChallenge::PIECE_WIDTH, PuzzleChallenge::PIECE_HEIGHT);
 
         $hole = clone $piece;
-        $hole->opacity(60);
-        $image
-            ->resize(PuzzleChallenge::WIDTH, PuzzleChallenge::HEIGHT);
+        $hole->opacity(80);
+        // $image
+        //     ->resize(PuzzleChallenge::WIDTH, PuzzleChallenge::HEIGHT);
+        // $image->scale(width: PuzzleChallenge::WIDTH, height: PuzzleChallenge::HEIGHT);
+        $image->fit(PuzzleChallenge::WIDTH, PuzzleChallenge::HEIGHT);
         $piece->insert($image, 'top-left', -$x, -$y)
               ->mask($hole, true);
         $image
@@ -44,11 +46,9 @@ class PuzzleGenerator implements ChallengeGenerator
                 'rgba(0, 0, 0, 0)'
             )
             ->insert($piece, 'top-right')
-            ->insert($hole->opacity(60), 'top-left', $x, $y);
+            ->insert($hole->opacity(80), 'top-left', $x, $y);
 
         return $image->response('webp');
-        return new Response('Bonjour', 200);
-
     }
 
 }

@@ -2,7 +2,7 @@
 
 namespace App\Domain\AntiSpam;
 
-interface ChallengeInterface
+interface CaptchaInterface
 {
     public function generateKey(): string;
 

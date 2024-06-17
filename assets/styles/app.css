@@ -222,9 +222,10 @@ h1 {
 	background: url(/image/piece_border.png) center/100% 100% no-repeat;
 	content: '';
 	position: absolute;
-	width: calc(var(--pieceWidth) - 5px);
-	height: calc(var(--pieceHeight) - 5px);
-	transform: translate(2px, 2px);
+	width: calc(var(--pieceWidth));
+	height: calc(var(--pieceHeight));
+	
+	/* transform: translate(2px, 2px); */
 	transition: .3s
 }
 

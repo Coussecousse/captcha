@@ -2,11 +2,11 @@
 
 namespace App\Domain\AntiSpam\Puzzle;
 
-use App\Domain\AntiSpam\ChallengeInterface;
+use App\Domain\AntiSpam\CaptchaInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-class PuzzleChallenge implements ChallengeInterface
+class PuzzleChallenge implements CaptchaInterface
 {
     public const WIDTH = 350;
     public const HEIGHT = 200;

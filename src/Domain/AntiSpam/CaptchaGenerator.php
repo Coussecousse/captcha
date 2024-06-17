@@ -4,7 +4,7 @@ namespace App\Domain\AntiSpam;
 
 use Symfony\Component\HttpFoundation\Response;
 
-interface ChallengeGenerator
+interface CaptchaGenerator
 {
     public function generate(string $key): Response;
 

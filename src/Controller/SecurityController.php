@@ -2,9 +2,8 @@
 
 namespace App\Controller;
 
-use App\Domain\AntiSpam\ChallengeInterface;
+use App\Domain\AntiSpam\CaptchaInterface;
 use App\Form\AuthFormType;
-use App\Form\RegistrationFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,7 +14,7 @@ class SecurityController extends AbstractController
 {
     #[Route(path: '/', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils, 
-        ChallengeInterface $challenge,
+        CaptchaInterface $challenge,
         Request $request): Response
     {
         $form = $this->createForm(AuthFormType::class);
