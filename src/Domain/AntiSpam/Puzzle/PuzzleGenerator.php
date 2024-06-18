@@ -41,7 +41,7 @@ class PuzzleGenerator implements CaptchaGenerator
         return $randomImage;
     }
 
-    public function getPieces(int $number):array 
+    public function getPieces(int $number): array 
     {
         $pieces = [];
         $project_dir = $this->appKernel->getProjectDir();

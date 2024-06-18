@@ -8,7 +8,7 @@ interface CaptchaGenerator
 {
     public function chosingAPic(): string;
     
-    public function getPieces(): array;
+    public function getPieces(int $number): array;
 
     public function generate(string $key): Response;
 
