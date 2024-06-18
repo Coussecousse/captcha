@@ -204,7 +204,7 @@ h1 {
 	border: 2px solid #D1D1D4;
 	width: var(--width);
 	height: var(--height);
-	background: var(--image);
+	background: var(--image) center no-repeat;
 	touch-action: none;
 }
 
@@ -215,7 +215,6 @@ h1 {
 	width: var(--pieceWidth);
 	height: var(--pieceHeight);
 	background: var(--image) top right;
-	/* background: url(/assets/image/piece_border.png); */
 	}
 	
 .captcha-piece::after {
