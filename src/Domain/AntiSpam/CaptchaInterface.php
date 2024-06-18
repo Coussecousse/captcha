@@ -8,5 +8,5 @@ interface CaptchaInterface
 
     public function verify(string $key, string $answer): bool;
 
-    public function getSolution(string $key): mixed;
+    public function getSolutions(string $key): mixed;
 }

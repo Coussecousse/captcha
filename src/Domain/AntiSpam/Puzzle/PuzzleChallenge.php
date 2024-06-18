@@ -10,10 +10,11 @@ class PuzzleChallenge implements CaptchaInterface
 {
     public const WIDTH = 350;
     public const HEIGHT = 200;
-    public const PIECE_WIDTH = 80;
-    PUBLIC const PIECE_HEIGHT = 50;
+    public const PIECE_WIDTH = 60;
+    public const PIECE_HEIGHT = 40;
     private const SESSION_KEY = 'puzzles';
     private const PRECISION = 2;
+    public const PIECES_NUMBER = 3;
 
     public function __construct(private readonly RequestStack $requestStack)
     {
@@ -23,20 +24,27 @@ class PuzzleChallenge implements CaptchaInterface
     public function generateKey(): string
     {
         $session = $this->getSession();
-        $now = time();
+        $now = time() + mt_rand(0, 1000);
         
+        $positions = [];
+        while (count($positions) < self::PIECES_NUMBER) {
+            $x = mt_rand(0, self::WIDTH - self::PIECE_WIDTH);
+            $y = mt_rand(0, self::HEIGHT - self::PIECE_HEIGHT);
+            $positions[] = [$x, $y];
+        }
+
         $x = mt_rand(0, self::WIDTH - self::PIECE_WIDTH);
         $y = mt_rand(0, self::HEIGHT - self::PIECE_HEIGHT);
         
         $puzzles = $session->get(self::SESSION_KEY, []);
-        $puzzles[] = ['key' => $now, 'solution' => [$x, $y]];
+        $puzzles[] = ['key' => $now, 'solutions' => $positions];
         $session->set(self::SESSION_KEY, array_slice($puzzles,-10));
         return $now;
     }
 
     public function verify(string $key, string $answer): bool
     {
-        $expected = $this->getSolution($key);
+        $expected = $this->getSolutions($key);
 
         if (!$expected) return false;
 
@@ -53,13 +61,13 @@ class PuzzleChallenge implements CaptchaInterface
     /**
      * @return int[]|null
      */
-    public function getSolution(string $key): array | null
+    public function getSolutions(string $key): array | null
     {
         $puzzles = $this->getSession()->get(self::SESSION_KEY, []);
 
         foreach ($puzzles as $puzzle) {
             if ($puzzle['key'] != $key) continue;
-            return $puzzle['solution'];
+            return $puzzle['solutions'];
         }
 
         return null;
