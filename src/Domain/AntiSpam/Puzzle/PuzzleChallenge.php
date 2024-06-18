@@ -15,6 +15,7 @@ class PuzzleChallenge implements CaptchaInterface
     private const SESSION_KEY = 'puzzles';
     private const PRECISION = 2;
     public const PIECES_NUMBER = 3;
+    public const SPACE_BETWEEN_PIECES = 50;
 
     public function __construct(private readonly RequestStack $requestStack)
     {
@@ -27,14 +28,27 @@ class PuzzleChallenge implements CaptchaInterface
         $now = time() + mt_rand(0, 1000);
         
         $positions = [];
-        while (count($positions) < self::PIECES_NUMBER) {
-            $x = mt_rand(0, self::WIDTH - self::PIECE_WIDTH);
-            $y = mt_rand(0, self::HEIGHT - self::PIECE_HEIGHT);
-            $positions[] = [$x, $y];
+
+        $rangesWidth = [];
+        $maxHeight = self::HEIGHT - self::PIECE_HEIGHT;
+        $lastMinWidth = 0;
+        $imageDivision = (self::WIDTH - (self::SPACE_BETWEEN_PIECES * self::PIECES_NUMBER)) / self::PIECES_NUMBER;
+
+        // Calculate the width ranges for the image for each piece
+        for ($i = 1; $i <= self::PIECES_NUMBER; $i++) {
+            $nextWidth = $lastMinWidth + $imageDivision;
+            $rangesWidth[] = [$lastMinWidth, $nextWidth];
+            $lastMinWidth = $nextWidth + self::SPACE_BETWEEN_PIECES;
         }
 
-        $x = mt_rand(0, self::WIDTH - self::PIECE_WIDTH);
-        $y = mt_rand(0, self::HEIGHT - self::PIECE_HEIGHT);
+        // Generate positions for each piece
+        while (count($positions) < self::PIECES_NUMBER) {
+            $currentRange = $rangesWidth[count($positions)];
+            $x = mt_rand($currentRange[0], $currentRange[1]);
+            $y = mt_rand(0, $maxHeight);
+            $newPosition = [$x, $y];
+            $positions[] = $newPosition;
+        }
         
         $puzzles = $session->get(self::SESSION_KEY, []);
         $puzzles[] = ['key' => $now, 'solutions' => $positions];
