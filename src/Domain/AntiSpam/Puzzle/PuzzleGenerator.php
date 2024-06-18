@@ -83,8 +83,8 @@ class PuzzleGenerator implements CaptchaGenerator
 
             $hole = clone $piece;
             $hole->opacity(80);
-            dump(-$positions[$index][0]);
-            $piece->insert($image, 'top-left', -$positions[$index][0], -$positions[$index][1])
+            $position = $positions[$index];
+            $piece->insert($image, 'top-left', -$position[0], -$position[1])
                   ->mask($hole, true);
             $holes[] = $hole;
             $pieces[$index] = $piece;
@@ -106,16 +106,14 @@ class PuzzleGenerator implements CaptchaGenerator
                 'rgba(0, 0, 0, 0)'
             );
         $piecePositions = ['top-right', 'bottom-right', 'top-left'];
-        for ($i = 0; $i < PuzzleChallenge::PIECES_NUMBER; $i++) {
-            dump($i);
-            $position = $positions[$i];
-            $piecePosition = $piecePositions[$i];
-            $piece = $pieces[$i];
-            $hole = $holes[$i];
-            $image->insert($piece, $piecePosition, $position[0], $position[1])
-                  ->insert($hole->opacity(80), 'top-left', $position[0], $position[1]);
+        foreach($pieces as $index => $piece) {
+            $position = $positions[$index];
+            $piecePosition = $piecePositions[$index];
+            $piece = $pieces[$index];
+            $hole = $holes[$index];
+            $image->insert($piece, $piecePosition)
+                  ->insert($hole->opacity(80), 'top-left', $position[0] + PuzzleChallenge::PIECE_WIDTH, $position[1]);
         }
-
 
         return $image->response('webp');
     }
