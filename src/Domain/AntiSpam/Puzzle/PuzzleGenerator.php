@@ -61,9 +61,34 @@ class PuzzleGenerator implements CaptchaGenerator
         return $pieces;
     }
 
+    public function resizeNecessary($piece, string $value = 'width') {
+        $size = 0;
+        $positions = [];
+        $width = 0;
+        $height = 0;
+        if ($value == 'width') {
+            $size = $piece->width();
+            $width = intval((PuzzleChallenge::PIECE_WIDTH - $size) / 2);
+            $positions = ['left', 'right'];
+        } elseif ($value == 'height') {
+            $size = $piece->height();
+            $height = intval((PuzzleChallenge::PIECE_HEIGHT - $size) / 2);
+            $positions = ['top', 'bottom'];
+        }
+
+        foreach ($positions as $position) {
+            $piece->resizeCanvas(
+                $width,
+                $height,
+                $position, 
+                true, 
+                'rgba(0, 0, 0, 0)'
+            );
+        }
+    } 
+
     public function generate(string $key): Response {
         $positions = $this->challenge->getSolutions($key);
-        dump($positions);
 
         if (!$positions) {
             return new Response('No position found', 404);
@@ -73,19 +98,47 @@ class PuzzleGenerator implements CaptchaGenerator
 
         $manager = new ImageManager(['driver' => 'gd']);
         $image = $manager->make($backgroundPath);
-        $image->fit(PuzzleChallenge::WIDTH, PuzzleChallenge::HEIGHT);
-
+        $image->resize(PuzzleChallenge::WIDTH, PuzzleChallenge::HEIGHT);
         $pieces = $this->getPieces(PuzzleChallenge::PIECES_NUMBER);
 
         $holes = [];
         $piecePositions = ['top-right', 'bottom-right', 'top-left'];
+
         // Randomize the positions of the pieces
         shuffle($positions);
+        
         foreach ($pieces as $index => $piece) {
             $piece = $manager->make($piece);
-            $piece->fit(PuzzleChallenge::PIECE_WIDTH, PuzzleChallenge::PIECE_HEIGHT);
+            $piece->resize(PuzzleChallenge::PIECE_WIDTH, PuzzleChallenge::PIECE_HEIGHT, function ($constraint) {
+                $constraint->aspectRatio();
+            });
+            if ($piece->height() < PuzzleChallenge::PIECE_HEIGHT) {
+                $pieceHeight = $piece->height();
+                $resizeTo = intval((PuzzleChallenge::PIECE_HEIGHT - $pieceHeight) / 2);
+                $piece->resizeCanvas(
+                    0, 
+                    $resizeTo,
+                    'top',
+                    true,
+                    'rgba(0, 0, 0, 0)'
+                    )
+                    ->resizeCanvas(
+                        0, 
+                        $resizeTo,
+                        'bottom',
+                        true,
+                        'rgba(0, 0, 0, 0)'
+                    );
+            }
+            
             $hole = clone $piece;
             $hole->opacity(80);
+
+            // In case we want to add an halo to the hole
+            // $halo = $manager->make($halos[$index]);
+            // $halo->fit(PuzzleChallenge::PIECE_WIDTH, PuzzleChallenge::PIECE_HEIGHT);
+            // $hole->insert($halo, 'top-left', 0, 0);
+
             $position = $positions[$index];
             $piecePosition = $piecePositions[$index];
 
@@ -112,10 +165,6 @@ class PuzzleGenerator implements CaptchaGenerator
                 true,
                 'rgba(0, 0, 0, 0)'
             );
-
-        // Randomize the positions of the holes
-        // shuffle($positions);
-        // shuffle($holes);
 
         foreach($pieces as $index => $piece) {
             $position = $positions[$index];

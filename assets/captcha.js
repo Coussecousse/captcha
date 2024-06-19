@@ -10,7 +10,7 @@ function widthRangesForPieces(width, numberOfPieces, spaceBetweenPieces) {
     let lastMinWidth = 0;
     const ranges = [];
     const imageDivision = (width - (spaceBetweenPieces * numberOfPieces)) / numberOfPieces;
-    
+
     for (let i = 0; i < numberOfPieces; i++) {
         const nextWidth = lastMinWidth + imageDivision;
         ranges.push([lastMinWidth, nextWidth]);
@@ -54,8 +54,7 @@ class PuzzleCaptcha extends HTMLElement
             this.appendChild(piece);
 
             let ranges = widthRangesForPieces(width, numberOfPieces, spaceBetweenPieces)[i];
-            console.log(ranges);
-
+            
             function onPointerMove(e) {
                 if (!isDragging) return;
                 position.x = clamp(position.x + e.movementX, 0, maxX);
