@@ -76,17 +76,22 @@ class PuzzleGenerator implements CaptchaGenerator
         $image->fit(PuzzleChallenge::WIDTH, PuzzleChallenge::HEIGHT);
 
         $pieces = $this->getPieces(PuzzleChallenge::PIECES_NUMBER);
+
         $holes = [];
         $piecePositions = ['top-right', 'bottom-right', 'top-left'];
+        // Randomize the positions of the pieces
+        shuffle($positions);
         foreach ($pieces as $index => $piece) {
             $piece = $manager->make($piece);
             $piece->fit(PuzzleChallenge::PIECE_WIDTH, PuzzleChallenge::PIECE_HEIGHT);
-
             $hole = clone $piece;
             $hole->opacity(80);
             $position = $positions[$index];
             $piecePosition = $piecePositions[$index];
+
+            // create the piece with the image in it
             $piece->insert($image, 'top-left', -$position[0], -$position[1])
+                // and then crop it to the piece size
                   ->mask($hole, true);
             $holes[] = $hole;
             $pieces[$index] = $piece;
@@ -107,12 +112,17 @@ class PuzzleGenerator implements CaptchaGenerator
                 true,
                 'rgba(0, 0, 0, 0)'
             );
+
+        // Randomize the positions of the holes
+        // shuffle($positions);
+        // shuffle($holes);
+
         foreach($pieces as $index => $piece) {
             $position = $positions[$index];
             $piecePosition = $piecePositions[$index];
             $hole = $holes[$index];
             $image->insert($piece, $piecePosition)
-                  ->insert($hole->opacity(80), 'top-left', $position[0] + PuzzleChallenge::PIECE_WIDTH, $position[1]);
+                ->insert($hole->opacity(80), 'top-left', $position[0] + PuzzleChallenge::PIECE_WIDTH, $position[1]);
         }
 
         return $image->response('webp');
