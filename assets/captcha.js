@@ -71,12 +71,14 @@ class PuzzleCaptcha extends HTMLElement
             piece.addEventListener('pointerdown', e => {
                 isDragging = true;
                 document.body.style.setProperty('user-select', 'none');
-                piece.classList.remove('piece-waiting-interaction');
                 piece.classList.add('is-moving');
     
                 window.addEventListener('pointerup', () => {
                     isDragging = false;
                     document.body.style.removeProperty('user-select');
+                    if (piece.classList.contains('piece-waiting-interaction')) {
+                        piece.classList.remove('piece-waiting-interaction');
+                    }
                     piece.classList.remove('is-moving');
                     this.removeEventListener('pointermove', onPointerMove);
                 }, {once: true})

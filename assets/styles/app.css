@@ -238,7 +238,6 @@ h1 {
 	background: url(../captcha/pieces/piece_1_halo.png) center/contain no-repeat;
 }
 
-
-.piece:not(.piece-waiting-interaction) .captcha-piece:not(.is-moving)::after  {
-	opacity: 0;
+.captcha-piece:not(.piece-waiting-interaction):not(.is-moving)::after {
+    opacity: 0;
 }
