@@ -41,16 +41,17 @@ class CaptchaType extends AbstractType
                 'class' => 'captcha-challenge', 
             ],
             'data' => $this->challenge->generateKey()
-            ])
-            ->add('answer', HiddenType::class, [
+        ]);
+        for ($i = 1; $i <= PuzzleChallenge::PIECES_NUMBER; $i++) {
+            $builder->add('answer_'.($i), HiddenType::class, [
                 'constraints' => [
                     new NotBlank(['message' => 'Veuillez donner une réponse.'])
                 ],
                 'attr' => [
                     'class' => 'captcha-answer', 
                 ]
-            ]
-        );
+            ]);
+        }
 
         parent::buildForm($builder, $options);
     }

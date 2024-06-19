@@ -40,7 +40,8 @@ class PuzzleCaptcha extends HTMLElement
         this.style.setProperty('--pieceWidth', `${pieceWidth}px`);
         this.style.setProperty('--pieceHeight', `${pieceHeight}px`);
 
-        const input = this.querySelector('.captcha-answer');
+        const inputs = this.querySelectorAll('.captcha-answer');
+        
         let isDragging = false;
         const piecesImagePostition = [
             'top right',
@@ -54,12 +55,26 @@ class PuzzleCaptcha extends HTMLElement
             this.appendChild(piece);
 
             let ranges = widthRangesForPieces(width, numberOfPieces, spaceBetweenPieces)[i];
-            
+
             function onPointerMove(e) {
                 if (!isDragging) return;
                 position.x = clamp(position.x + e.movementX, 0, maxX);
                 position.y = clamp(position.y + e.movementY, 0, maxY);
                 piece.style.setProperty('transform', `translate(${position.x}px, ${position.y}px)` )
+
+                let input;
+                switch(piece.id) {
+                    case 'piece-2':
+                        input = Array.from(inputs).find(input => input.name.includes('answer_2'));
+                        break;
+                    case 'piece-3':
+                        input = Array.from(inputs).find(input => input.name.includes('answer_3'));
+                        return;
+                    case 'piece-1':
+                        input = inputsArray.from(inputs).find(input => input.name.includes('answer_1'));
+                    default:
+                        break;
+                }
                 input.value = `${position.x}-${position.y}`;
             }
 
