@@ -13,7 +13,6 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\NotNull;
 
 class CaptchaType extends AbstractType
 {
@@ -66,7 +65,9 @@ class CaptchaType extends AbstractType
             'piece-height' => PuzzleChallenge::PIECE_HEIGHT,
             'src' => $this->urlGenerator->generate($options['route'], [
                 'challenge' => $form->get('challenge')->getData()
-            ])
+            ]),
+            'pieces-number' => PuzzleChallenge::PIECES_NUMBER,
+            'space-between-pieces' => PuzzleChallenge::SPACE_BETWEEN_PIECES,
         ];
         
         parent::buildView($view, $form, $options);

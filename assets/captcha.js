@@ -6,6 +6,20 @@ function randomNumberBetween(min, max) {
     return Math.floor(Math.random() * (max-min + 1) + min);
 }
 
+function widthRangesForPieces(width, numberOfPieces, spaceBetweenPieces) {
+    let lastMinWidth = 0;
+    const ranges = [];
+    const imageDivision = (width - (spaceBetweenPieces * numberOfPieces)) / numberOfPieces;
+
+    for (let i = 0; i < numberOfPieces; i++) {
+        const nextWidth = lastMinWidth + imageDivision;
+        ranges.push([lastMinWidth, nextWidth]);
+        lastMinWidth = nextWidth + spaceBetweenPieces; 
+    }
+
+    return ranges;
+}
+
 class PuzzleCaptcha extends HTMLElement
 {
 
@@ -16,9 +30,10 @@ class PuzzleCaptcha extends HTMLElement
         const pieceHeight = parseInt(this.getAttribute('piece-height'), 10);
         const maxX = width - pieceWidth;
         const maxY = height - pieceHeight; 
+        const numberOfPieces = this.getAttribute('pieces-number') || 1;
+        const spaceBetweenPieces = this.getAttribute('spaces-between-pieces') || 0;
 
         this.classList.add('captcha');
-        this.classList.add('captcha-waiting-interaction');
         this.style.setProperty('--image', `url(${this.getAttribute('src')})`);
         this.style.setProperty('--width', `${width}px`);
         this.style.setProperty('--height', `${height}px`);
@@ -26,36 +41,49 @@ class PuzzleCaptcha extends HTMLElement
         this.style.setProperty('--pieceHeight', `${pieceHeight}px`);
 
         const input = this.querySelector('.captcha-answer');
-        const piece = document.createElement('div');
-        piece.classList.add('captcha-piece');
-        this.appendChild(piece);
-
         let isDragging = false;
-        let position = {x: randomNumberBetween(0, maxX), y: randomNumberBetween(0, maxY)};
-        piece.style.setProperty('transform', `translate(${position.x}px, ${position.y}px)`);
+        const piecesImagePostition = [
+            'top right',
+            'bottom right',
+            'top left',
+        ]
+        for (let i = 0; i < numberOfPieces; i++) {
+            const piece = document.createElement('div');
+            piece.id = `piece-${i+1}`;
+            piece.classList.add('captcha-piece', 'piece-waiting-interaction');
+            this.appendChild(piece);
 
-        piece.addEventListener('pointerdown', e => {
-            isDragging = true;
-            document.body.style.setProperty('user-select', 'none');
-            this.classList.remove('captcha-waiting-interaction');
-            piece.classList.add('is-moving');
+            let ranges = widthRangesForPieces(width, numberOfPieces, spaceBetweenPieces)[i];
 
+            function onPointerMove(e) {
+                if (!isDragging) return;
+                position.x = clamp(position.x + e.movementX, 0, maxX);
+                position.y = clamp(position.y + e.movementY, 0, maxY);
+                piece.style.setProperty('transform', `translate(${position.x}px, ${position.y}px)` )
+                input.value = `${position.x}-${position.y}`;
+            }
 
-            window.addEventListener('pointerup', () => {
-                isDragging = false;
-                document.body.style.removeProperty('user-select');
-                piece.classList.remove('is-moving');
-            }, {once: true})
-        })
+            let position = {x: randomNumberBetween(ranges[0], ranges[1]), y: randomNumberBetween(0, maxY)};
 
-        this.addEventListener('pointermove', e => {
-            if (!isDragging) return;
+            piece.style.setProperty('transform', `translate(${position.x}px, ${position.y}px)`);
+            piece.style.setProperty('background-position', `${piecesImagePostition[i]}`);
 
-            position.x = clamp(position.x + e.movementX, 0, maxX);
-            position.y = clamp(position.y + e.movementY, 0, maxY);
-            piece.style.setProperty('transform', `translate(${position.x}px, ${position.y}px)` )
-            input.value = `${position.x}-${position.y}`;
-        })
+            piece.addEventListener('pointerdown', e => {
+                isDragging = true;
+                document.body.style.setProperty('user-select', 'none');
+                piece.classList.remove('piece-waiting-interaction');
+                piece.classList.add('is-moving');
+    
+                window.addEventListener('pointerup', () => {
+                    isDragging = false;
+                    document.body.style.removeProperty('user-select');
+                    piece.classList.remove('is-moving');
+                    this.removeEventListener('pointermove', onPointerMove);
+                }, {once: true})
+
+                this.addEventListener('pointermove', onPointerMove);
+            })
+        }
     }
 }
 

@@ -214,20 +214,31 @@ h1 {
 	left: 0;
 	width: var(--pieceWidth);
 	height: var(--pieceHeight);
-	background: var(--image) top right;
-	}
+	background: var(--image);
+}
 	
 .captcha-piece::after {
-	background: url(/image/piece_border.png) center/100% 100% no-repeat;
 	content: '';
 	position: absolute;
 	width: calc(var(--pieceWidth));
 	height: calc(var(--pieceHeight));
 	
-	/* transform: translate(2px, 2px); */
 	transition: .3s
 }
 
-.captcha:not(.captcha-waiting-interaction) .captcha-piece:not(.is-moving)::after  {
+#piece-1::after {
+	background: url(../captcha/pieces/piece_3_halo.png) center/contain no-repeat;
+}
+
+#piece-2::after {
+	background: url(../captcha/pieces/piece_2_halo.png) center/contain no-repeat;
+}
+
+#piece-3::after {
+	background: url(../captcha/pieces/piece_1_halo.png) center/contain no-repeat;
+}
+
+
+.piece:not(.piece-waiting-interaction) .captcha-piece:not(.is-moving)::after  {
 	opacity: 0;
 }

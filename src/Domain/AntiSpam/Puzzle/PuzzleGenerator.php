@@ -77,6 +77,7 @@ class PuzzleGenerator implements CaptchaGenerator
 
         $pieces = $this->getPieces(PuzzleChallenge::PIECES_NUMBER);
         $holes = [];
+        $piecePositions = ['top-right', 'bottom-right', 'top-left'];
         foreach ($pieces as $index => $piece) {
             $piece = $manager->make($piece);
             $piece->fit(PuzzleChallenge::PIECE_WIDTH, PuzzleChallenge::PIECE_HEIGHT);
@@ -84,6 +85,7 @@ class PuzzleGenerator implements CaptchaGenerator
             $hole = clone $piece;
             $hole->opacity(80);
             $position = $positions[$index];
+            $piecePosition = $piecePositions[$index];
             $piece->insert($image, 'top-left', -$position[0], -$position[1])
                   ->mask($hole, true);
             $holes[] = $hole;
@@ -105,11 +107,9 @@ class PuzzleGenerator implements CaptchaGenerator
                 true,
                 'rgba(0, 0, 0, 0)'
             );
-        $piecePositions = ['top-right', 'bottom-right', 'top-left'];
         foreach($pieces as $index => $piece) {
             $position = $positions[$index];
             $piecePosition = $piecePositions[$index];
-            $piece = $pieces[$index];
             $hole = $holes[$index];
             $image->insert($piece, $piecePosition)
                   ->insert($hole->opacity(80), 'top-left', $position[0] + PuzzleChallenge::PIECE_WIDTH, $position[1]);

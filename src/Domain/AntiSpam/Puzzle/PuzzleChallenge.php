@@ -10,8 +10,8 @@ class PuzzleChallenge implements CaptchaInterface
 {
     public const WIDTH = 350;
     public const HEIGHT = 200;
-    public const PIECE_WIDTH = 60;
-    public const PIECE_HEIGHT = 40;
+    public const PIECE_WIDTH = 50;
+    public const PIECE_HEIGHT = 50;
     private const SESSION_KEY = 'puzzles';
     private const PRECISION = 2;
     public const PIECES_NUMBER = 3;
@@ -35,7 +35,7 @@ class PuzzleChallenge implements CaptchaInterface
         $imageDivision = (self::WIDTH - (self::SPACE_BETWEEN_PIECES * self::PIECES_NUMBER)) / self::PIECES_NUMBER;
 
         // Calculate the width ranges for the image for each piece
-        for ($i = 1; $i <= self::PIECES_NUMBER; $i++) {
+        for ($i = 0; $i < self::PIECES_NUMBER; $i++) {
             $nextWidth = $lastMinWidth + $imageDivision;
             $rangesWidth[] = [$lastMinWidth, $nextWidth];
             $lastMinWidth = $nextWidth + self::SPACE_BETWEEN_PIECES;
