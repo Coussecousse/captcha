@@ -10,12 +10,10 @@ function widthRangesForPieces(width, numberOfPieces, spaceBetweenPieces) {
     let lastMinWidth = 0;
     const ranges = [];
     const imageDivision = (width - (spaceBetweenPieces * numberOfPieces)) / numberOfPieces;
-    console.log(imageDivision);
+    
     for (let i = 0; i < numberOfPieces; i++) {
         const nextWidth = lastMinWidth + imageDivision;
-        console.log(nextWidth)
         ranges.push([lastMinWidth, nextWidth]);
-        console.log(spaceBetweenPieces);
         lastMinWidth = nextWidth + spaceBetweenPieces; 
     }
 
