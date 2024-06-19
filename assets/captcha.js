@@ -10,10 +10,12 @@ function widthRangesForPieces(width, numberOfPieces, spaceBetweenPieces) {
     let lastMinWidth = 0;
     const ranges = [];
     const imageDivision = (width - (spaceBetweenPieces * numberOfPieces)) / numberOfPieces;
-
+    console.log(imageDivision);
     for (let i = 0; i < numberOfPieces; i++) {
         const nextWidth = lastMinWidth + imageDivision;
+        console.log(nextWidth)
         ranges.push([lastMinWidth, nextWidth]);
+        console.log(spaceBetweenPieces);
         lastMinWidth = nextWidth + spaceBetweenPieces; 
     }
 
@@ -30,8 +32,8 @@ class PuzzleCaptcha extends HTMLElement
         const pieceHeight = parseInt(this.getAttribute('piece-height'), 10);
         const maxX = width - pieceWidth;
         const maxY = height - pieceHeight; 
-        const numberOfPieces = this.getAttribute('pieces-number') || 1;
-        const spaceBetweenPieces = this.getAttribute('spaces-between-pieces') || 0;
+        const numberOfPieces = parseInt(this.getAttribute('pieces-number')) || 1;
+        const spaceBetweenPieces = parseInt(this.getAttribute('space-between-pieces')) || 0;
 
         this.classList.add('captcha');
         this.style.setProperty('--image', `url(${this.getAttribute('src')})`);
@@ -54,6 +56,7 @@ class PuzzleCaptcha extends HTMLElement
             this.appendChild(piece);
 
             let ranges = widthRangesForPieces(width, numberOfPieces, spaceBetweenPieces)[i];
+            console.log(ranges);
 
             function onPointerMove(e) {
                 if (!isDragging) return;
