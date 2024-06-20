@@ -227,15 +227,15 @@ h1 {
 }
 
 #piece-1::after {
-	background: url(../captcha/pieces/piece_3_halo.png) center/contain no-repeat;
+	background: url(../captcha/pieces/piece_1_halo.png) center/contain no-repeat;
 }
 
 #piece-2::after {
-	background: url(../captcha/pieces/piece_2_halo.png) center/contain no-repeat;
+	background: url(../captcha/pieces/piece_3_halo.png) center/contain no-repeat;
 }
 
 #piece-3::after {
-	background: url(../captcha/pieces/piece_1_halo.png) center/contain no-repeat;
+	background: url(../captcha/pieces/piece_2_halo.png) center/contain no-repeat;
 }
 
 .captcha-piece:not(.piece-waiting-interaction):not(.is-moving)::after {

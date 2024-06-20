@@ -6,7 +6,7 @@ interface CaptchaInterface
 {
     public function generateKey(): string;
 
-    public function verify(string $key, string $answer): bool;
+    public function verify(string $key, array $answers): bool;
 
     public function getSolutions(string $key): mixed;
 }

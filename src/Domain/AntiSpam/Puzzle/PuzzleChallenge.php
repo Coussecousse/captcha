@@ -13,7 +13,7 @@ class PuzzleChallenge implements CaptchaInterface
     public const PIECE_WIDTH = 50;
     public const PIECE_HEIGHT = 50;
     private const SESSION_KEY = 'puzzles';
-    private const PRECISION = 2;
+    private const PRECISION = 10;
     public const PIECES_NUMBER = 3;
     public const SPACE_BETWEEN_PIECES = 50;
 
@@ -27,7 +27,7 @@ class PuzzleChallenge implements CaptchaInterface
         $session = $this->getSession();
         $now = time() + mt_rand(0, 1000);
         
-        $positions = [];
+        $solutions = [];
 
         $rangesWidth = [];
         $maxHeight = self::HEIGHT - self::PIECE_HEIGHT;
@@ -42,34 +42,66 @@ class PuzzleChallenge implements CaptchaInterface
         }
 
         // Generate positions for each piece
-        while (count($positions) < self::PIECES_NUMBER) {
-            $currentRange = $rangesWidth[count($positions)];
+        while (count($solutions) < self::PIECES_NUMBER) {
+            $piece = 'piece_'.count($solutions) + 1;
+            $currentRange = $rangesWidth[count($solutions)];
             $x = mt_rand($currentRange[0], $currentRange[1]);
             $y = mt_rand(0, $maxHeight);
             $newPosition = [$x, $y];
-            $positions[] = $newPosition;
+            $solutions[] = ['position' => $newPosition, 'piece' => $piece];
         }
         
         $puzzles = $session->get(self::SESSION_KEY, []);
-        $puzzles[] = ['key' => $now, 'solutions' => $positions];
+        $puzzles[] = ['key' => $now, 'solutions' => $solutions];
         $session->set(self::SESSION_KEY, array_slice($puzzles,-10));
         return $now;
     }
 
-    public function verify(string $key, string $answer): bool
+    public function verify(string $key, array $answers): bool
     {
-        $expected = $this->getSolutions($key);
+        $solutions = $this->getSolutions($key);
+        dump($solutions);
 
-        if (!$expected) return false;
+        if (!$solutions) return false;
 
         // Remove puzzle from session to avoid brute force attack
         $session = $this->getSession();
         $puzzles = $session->get(self::SESSION_KEY);
         $session->set(self::SESSION_KEY, array_filter($puzzles, fn(array $puzzle) => $puzzle['key'] != $key));
 
-        $got = $this->stringToPosition($answer);
+        $got = $this->stringToPosition($answers);
 
-        return abs($expected[0] - $got[0]) <= self::PRECISION && abs($expected[1] - $got[1]) <= self::PRECISION;
+
+        dump($solutions);
+        dump($got);
+        foreach($got as $index => $answer) {
+            $position = array_filter($solutions, function($item) use ($index) {
+                return $item['piece'] == 'piece_'.$index + 1;
+            });
+            
+            dump($position);
+            if (!empty($position)) {
+                $position = reset($position);
+                $position = $position['position'];
+            }
+
+            dump($position);
+            dump($answer);
+
+            $isWithinPrecision = (
+                abs($position[0] - $answer[0]) <= self::PRECISION &&
+                abs($position[1] - $answer[1]) <= self::PRECISION
+            );
+
+            dump($isWithinPrecision);
+        
+            if (!$isWithinPrecision) {
+                dump('hoy');
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -95,13 +127,19 @@ class PuzzleChallenge implements CaptchaInterface
     /**
      * @return int[]
      */
-    private function stringToPosition(string $s): array
+    private function stringToPosition(array $answers): array
     {
-        $parts = explode('-', $s, 2);
 
-        if (count($parts) !== 2) {
-            return [-1, -1];
+        $positions = [];
+        foreach ($answers as $answer) {
+            $parts = explode('-', $answer, 2);
+            if (count($parts) !== 2) {
+                $positions[] = [-1, -1];
+            } else {
+                $positions[] = [intval($parts[0]), intval($parts[1])];
+            }
         }
-        return [intval($parts[0]), intval($parts[1])];
+        dump($positions);
+        return $positions;
     }
 }

@@ -28,7 +28,14 @@ class ChallengeValidator extends ConstraintValidator
             }
         }
 
-        if (!$this->challenge->verify($value['challenge'], $value['answer'])) {
+        foreach($value as $key => $val) {
+            if (str_starts_with($key, 'answer_')) {
+                $answers[] = $val;
+            }
+        }
+        dump($answers);
+
+        if (!$this->challenge->verify($value['challenge'], $answers)) {
             $this->context->buildViolation($constraint->message)
                 ->addViolation();
         }
