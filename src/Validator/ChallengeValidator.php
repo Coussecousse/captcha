@@ -33,7 +33,6 @@ class ChallengeValidator extends ConstraintValidator
                 $answers[] = $val;
             }
         }
-        dump($answers);
 
         if (!$this->challenge->verify($value['challenge'], $answers)) {
             $this->context->buildViolation($constraint->message)
