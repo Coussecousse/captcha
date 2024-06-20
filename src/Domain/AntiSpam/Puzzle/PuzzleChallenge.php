@@ -60,7 +60,6 @@ class PuzzleChallenge implements CaptchaInterface
     public function verify(string $key, array $answers): bool
     {
         $solutions = $this->getSolutions($key);
-        dump($solutions);
 
         if (!$solutions) return false;
 
@@ -71,32 +70,23 @@ class PuzzleChallenge implements CaptchaInterface
 
         $got = $this->stringToPosition($answers);
 
-
-        dump($solutions);
-        dump($got);
         foreach($got as $index => $answer) {
             $position = array_filter($solutions, function($item) use ($index) {
                 return $item['piece'] == 'piece_'.$index + 1;
             });
             
-            dump($position);
             if (!empty($position)) {
                 $position = reset($position);
                 $position = $position['position'];
             }
-
-            dump($position);
-            dump($answer);
 
             $isWithinPrecision = (
                 abs($position[0] - $answer[0]) <= self::PRECISION &&
                 abs($position[1] - $answer[1]) <= self::PRECISION
             );
 
-            dump($isWithinPrecision);
         
             if (!$isWithinPrecision) {
-                dump('hoy');
                 return false;
             }
         }
@@ -129,7 +119,6 @@ class PuzzleChallenge implements CaptchaInterface
      */
     private function stringToPosition(array $answers): array
     {
-
         $positions = [];
         foreach ($answers as $answer) {
             $parts = explode('-', $answer, 2);
@@ -139,7 +128,7 @@ class PuzzleChallenge implements CaptchaInterface
                 $positions[] = [intval($parts[0]), intval($parts[1])];
             }
         }
-        dump($positions);
+
         return $positions;
     }
 }
