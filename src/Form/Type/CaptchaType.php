@@ -4,7 +4,7 @@ namespace App\Form\Type;
 
 use App\Domain\AntiSpam\CaptchaInterface;
 use App\Domain\AntiSpam\Puzzle\PuzzleChallenge;
-use App\Validator\Challenge;
+use App\Validator\Captcha;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -23,7 +23,7 @@ class CaptchaType extends AbstractType
     {
         $resolver->setDefaults([
             'constraints' => [
-                new Challenge()
+                new Captcha()
             ], 
             'error_bubbling' => false,
             'route' => 'app_captcha',
