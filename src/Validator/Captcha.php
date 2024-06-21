@@ -15,7 +15,9 @@ class Captcha extends Constraint
      * Any public properties become valid options for the annotation.
      * Then, use these in your validator class.
      */
-    public string $message = 'Captcha invalide';
+    public string $invalidCaptcha = 'Captcha invalide';
+
+    public string $emptyResponse = 'Veuillez remplir le captcha';
 
 
 }

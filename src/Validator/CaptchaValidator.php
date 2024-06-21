@@ -6,7 +6,7 @@ use App\Domain\AntiSpam\CaptchaInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
-class PuzzleValidator extends ConstraintValidator
+class CaptchaValidator extends ConstraintValidator
 {
     public function __construct(private readonly CaptchaInterface $captcha)
     {
@@ -22,7 +22,7 @@ class PuzzleValidator extends ConstraintValidator
         // Check if the value isn't blank
         foreach($value as $val) {
             if (null === $val || '' === $val) {
-                $this->context->buildViolation($constraint->message)
+                $this->context->buildViolation($constraint->emptyResponse)
                 ->addViolation();
                 return;
             }
@@ -35,7 +35,7 @@ class PuzzleValidator extends ConstraintValidator
         }
 
         if (!$this->captcha->verify($value['challenge'], $answers)) {
-            $this->context->buildViolation($constraint->message)
+            $this->context->buildViolation($constraint->invalidCaptcha)
                 ->addViolation();
         }
 
