@@ -20,7 +20,6 @@ class PuzzleGenerator implements CaptchaGenerator
     public function chosingAPic(): string {
 
         $imagesFormat = ['jpg', 'jpeg', 'png', 'webp'];
-
         
         $images = [];
                 
@@ -91,9 +90,18 @@ class PuzzleGenerator implements CaptchaGenerator
 
     public function generate(string $key): Response {
         $solutions = $this->challenge->getSolutions($key);
-
+        
         if (!$solutions) {
             return new Response('No position found', 404);
+        }
+        
+        // The key is already used so we need new positions
+        if (array_key_exists('verified', $solutions)) {
+            $solutions = $this->challenge->generatePositions();
+            $puzzle = $this->challenge->createPuzzle($key, $solutions);
+            $this->challenge->setSessionPuzzles($puzzle);
+        } else {
+            $solutions = $solutions['solutions'];
         }
 
         $backgroundPath = $this->chosingAPic();
@@ -104,9 +112,6 @@ class PuzzleGenerator implements CaptchaGenerator
         $pieces = $this->getPieces(PuzzleChallenge::PIECES_NUMBER);
 
         $holes = [];
-
-        // Randomize the positions of the pieces
-        // shuffle($solutions);
         
         foreach ($pieces as $index => $piece) {
             $piece = $manager->make($piece);
@@ -163,11 +168,10 @@ class PuzzleGenerator implements CaptchaGenerator
 
             $randomPiecePosition = $piecesPositionsInImages[$index];
             $image
-                // ->insert($piece, $piecePosition)
                 ->insert($piece, $randomPiecePosition)
                 ->insert($hole->opacity(80), 'top-left', $position[0] + PuzzleChallenge::PIECE_WIDTH, $position[1]);
         }
-
+        
         return $image->response('webp');
     }
 

@@ -33,11 +33,6 @@ class RegistrationFormType extends AbstractType
             ])
             ->add('captcha', CaptchaType::class, [
                 'mapped' => false,
-                // 'route' => 'app_captcha',
-                // 'error_mapping' => [
-                //     'captcha' => 'captcha'
-                // ],
-                // 'constraints' => [ new Challenge()]
             ])
         ;
     }

@@ -22,11 +22,8 @@ class PuzzleChallenge implements CaptchaInterface
         
     }
 
-    public function generateKey(): string
+    public function generatePositions(): array 
     {
-        $session = $this->getSession();
-        $now = time() + mt_rand(0, 1000);
-        
         $solutions = [];
 
         $rangesWidth = [];
@@ -51,10 +48,39 @@ class PuzzleChallenge implements CaptchaInterface
             $solutions[] = ['position' => $newPosition, 'piece' => $piece];
         }
         
+        return $solutions;
+    }
+
+    public function setSessionPuzzles(array $puzzle): void 
+    {
+        $session = $this->getSession();
+
         $puzzles = $session->get(self::SESSION_KEY, []);
-        $puzzles[] = ['key' => $now, 'solutions' => $solutions];
+
+        // if the puzzle in the puzzles array already exist 
+        // we remove it to avoid duplicates
+        $puzzles = array_filter($puzzles, fn(array $p) => $p['key'] != $puzzle['key']);
+
+        $puzzles[] = $puzzle;
         $session->set(self::SESSION_KEY, array_slice($puzzles,-10));
-        return $now;
+    }
+
+    public function createPuzzle(int $key, array $solutions): array 
+    {
+        return $puzzle = ['key' => $key, 'solutions' => $solutions];
+    }
+
+    public function generateKey(): string
+    {
+        $key = time() + mt_rand(0, 1000);
+        
+        $solutions = $this->generatePositions();
+        
+        $puzzle = $this->createPuzzle($key, $solutions);
+
+        $this->setSessionPuzzles($puzzle);
+
+        return $key;
     }
 
     public function verify(string $key, array $answers): bool
@@ -63,12 +89,24 @@ class PuzzleChallenge implements CaptchaInterface
 
         if (!$solutions) return false;
 
+        // The key is verified a first time
+        // So to avoid brute force attack, we need to add a field to say that we already verify it
+        if (!array_key_exists('verifies', $solutions)) {
+            $puzzles = $this->getSession()->get(self::SESSION_KEY, []);
+            foreach ($puzzles as $index => $puzzle) {
+                if ($puzzle['key'] != $key) continue;
+                $puzzle['verified'] = 1;
+                $puzzles[$index] = $puzzle;
+            } 
+            $session = $this->getSession();
+            $session->set(self::SESSION_KEY, array_slice($puzzles,-10));
+        } 
+        
         // Remove puzzle from session to avoid brute force attack
-        $session = $this->getSession();
-        $puzzles = $session->get(self::SESSION_KEY);
-        $session->set(self::SESSION_KEY, array_filter($puzzles, fn(array $puzzle) => $puzzle['key'] != $key));
 
         $got = $this->stringToPosition($answers);
+
+        $solutions = $solutions['solutions'];
 
         foreach($got as $index => $answer) {
             $position = array_filter($solutions, function($item) use ($index) {
@@ -84,12 +122,16 @@ class PuzzleChallenge implements CaptchaInterface
                 abs($position[0] - $answer[0]) <= self::PRECISION &&
                 abs($position[1] - $answer[1]) <= self::PRECISION
             );
-
-        
+            
             if (!$isWithinPrecision) {
                 return false;
             }
         }
+
+        // Remove puzzle from session to avoid brute force attack
+        $session = $this->getSession();
+        $puzzles = $session->get(self::SESSION_KEY);
+        $session->set(self::SESSION_KEY, array_filter($puzzles, fn(array $puzzle) => $puzzle['key'] != $key));
 
         return true;
     }
@@ -100,10 +142,9 @@ class PuzzleChallenge implements CaptchaInterface
     public function getSolutions(string $key): array | null
     {
         $puzzles = $this->getSession()->get(self::SESSION_KEY, []);
-
         foreach ($puzzles as $puzzle) {
             if ($puzzle['key'] != $key) continue;
-            return $puzzle['solutions'];
+            return $puzzle;
         }
 
         return null;

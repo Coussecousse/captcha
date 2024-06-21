@@ -18,6 +18,7 @@ class SecurityController extends AbstractController
         Request $request): Response
     {
         $form = $this->createForm(AuthFormType::class);
+        
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
 

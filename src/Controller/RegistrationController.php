@@ -23,7 +23,6 @@ class RegistrationController extends AbstractController
         }
 
         return $this->render('security/registration.html.twig', [
-            'challenge' => $challenge->generateKey(),
             'form' => $form->createView()
         ]);
     }
