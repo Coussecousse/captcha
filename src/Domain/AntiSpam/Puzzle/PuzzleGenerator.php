@@ -13,7 +13,7 @@ class PuzzleGenerator implements CaptchaGenerator
 {
     private $appKernel;
 
-    public function __construct(private readonly PuzzleChallenge $challenge, KernelInterface $appKernel) {
+    public function __construct(private readonly PuzzleChallenge $puzzle, KernelInterface $appKernel) {
         $this->appKernel = $appKernel;
     }
 
@@ -89,19 +89,11 @@ class PuzzleGenerator implements CaptchaGenerator
     } 
 
     public function generate(string $key): Response {
-        $solutions = $this->challenge->getSolutions($key);
-        
-        if (!$solutions) {
+        $puzzle = $this->puzzle->getPuzzle($key);
+        $solutions = $puzzle['solutions'];
+
+        if (!$puzzle) {
             return new Response('No position found', 404);
-        }
-        
-        // The key is already used so we need new positions
-        if (array_key_exists('verified', $solutions)) {
-            $solutions = $this->challenge->generatePositions();
-            $puzzle = $this->challenge->createPuzzle($key, $solutions);
-            $this->challenge->setSessionPuzzles($puzzle);
-        } else {
-            $solutions = $solutions['solutions'];
         }
 
         $backgroundPath = $this->chosingAPic();
@@ -159,6 +151,7 @@ class PuzzleGenerator implements CaptchaGenerator
                 'rgba(0, 0, 0, 0)'
             );
 
+        // Generate the positions for the pieces
         // Easy way
         $piecesPositionsInImages = ['bottom-right', 'top-left', 'top-right'];
 

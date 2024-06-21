@@ -18,11 +18,14 @@ class PuzzleChallenge implements CaptchaInterface
     public const SPACE_BETWEEN_PIECES = 50;
 
     public function __construct(private readonly RequestStack $requestStack)
-    {
-        
-    }
+    { }
 
-    public function generatePositions(): array 
+    /**
+     * Generate random positions for the pieces
+     * 
+     * @return array
+     */
+    private function generatePositions(): array 
     {
         $solutions = [];
 
@@ -51,7 +54,13 @@ class PuzzleChallenge implements CaptchaInterface
         return $solutions;
     }
 
-    public function setSessionPuzzles(array $puzzle): void 
+    /**
+     * Set the puzzle in the session
+     * 
+     * @param array $puzzle
+     * @return void
+     */
+    private function setSessionPuzzles(array $puzzle): void 
     {
         $session = $this->getSession();
 
@@ -65,48 +74,57 @@ class PuzzleChallenge implements CaptchaInterface
         $session->set(self::SESSION_KEY, array_slice($puzzles,-10));
     }
 
-    public function createPuzzle(int $key, array $solutions): array 
+    /**
+     * Create the array for the puzzle
+     * 
+     * @param int $key
+     * @param array $solutions
+     * @return array
+     */
+    private function createPuzzle(int $key, array $solutions): array 
     {
         return $puzzle = ['key' => $key, 'solutions' => $solutions];
+    }
+
+    public function generatePuzzle(int $key): void
+    {
+        $solutions = $this->generatePositions();
+        
+        $puzzle = $this->createPuzzle($key, $solutions);
+
+        $this->setSessionPuzzles($puzzle);
     }
 
     public function generateKey(): string
     {
         $key = time() + mt_rand(0, 1000);
         
-        $solutions = $this->generatePositions();
-        
-        $puzzle = $this->createPuzzle($key, $solutions);
-
-        $this->setSessionPuzzles($puzzle);
+        $this->generatePuzzle($key);
 
         return $key;
     }
 
     public function verify(string $key, array $answers): bool
     {
-        $solutions = $this->getSolutions($key);
+        $puzzle = $this->getPuzzle($key);
 
-        if (!$solutions) return false;
+        if (!$puzzle) return false;
 
         // The key is verified a first time
-        // So to avoid brute force attack, we need to add a field to say that we already verify it
-        if (!array_key_exists('verifies', $solutions)) {
+        // To avoid brute force attack, we need to add a field to say that we already verify it
+        // Allow to generate new positions when a new image is requested
+        if (!array_key_exists('verified', $puzzle)) {
             $puzzles = $this->getSession()->get(self::SESSION_KEY, []);
             foreach ($puzzles as $index => $puzzle) {
                 if ($puzzle['key'] != $key) continue;
                 $puzzle['verified'] = 1;
-                $puzzles[$index] = $puzzle;
+                $this->setSessionPuzzles($puzzle);
             } 
-            $session = $this->getSession();
-            $session->set(self::SESSION_KEY, array_slice($puzzles,-10));
         } 
-        
-        // Remove puzzle from session to avoid brute force attack
 
         $got = $this->stringToPosition($answers);
 
-        $solutions = $solutions['solutions'];
+        $solutions = $puzzle['solutions'];
 
         foreach($got as $index => $answer) {
             $position = array_filter($solutions, function($item) use ($index) {
@@ -136,14 +154,16 @@ class PuzzleChallenge implements CaptchaInterface
         return true;
     }
 
-    /**
-     * @return int[]|null
-     */
-    public function getSolutions(string $key): array | null
+    public function getPuzzle(string $key): array | null
     {
         $puzzles = $this->getSession()->get(self::SESSION_KEY, []);
         foreach ($puzzles as $puzzle) {
             if ($puzzle['key'] != $key) continue;
+
+            // If the key is already verified, we need to generate a new puzzle to avoid brute force attack
+            if (array_key_exists('verified', $puzzle)) {
+                $this->generatePuzzle($key);
+            }
             return $puzzle;
         }
 
@@ -156,6 +176,8 @@ class PuzzleChallenge implements CaptchaInterface
     }
 
     /**
+     * Get the string position from the answer(s) and return an array of positions in int
+     * 
      * @return int[]
      */
     private function stringToPosition(array $answers): array
