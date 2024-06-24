@@ -5,9 +5,13 @@
             {{ ( " " ~ attrname ~ "=\"" ~ attrvalue ~ "\"" )|raw('html') }}
         {% endfor %}
     >
-    {% for child in form.children %}
-        {{ form_widget(child) }}
-    {% endfor %}
+    <div class="captcha-image"></div>
+
+    <div class="captcha-pieces-container">    
+        {% for child in form.children %}
+            {{ form_widget(child) }}
+        {% endfor %}
+    </div>
     </puzzle-captcha>
     <div class="form__error">
         {{ form_errors(form) }}

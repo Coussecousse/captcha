@@ -32,8 +32,14 @@ class PuzzleCaptcha extends HTMLElement
         const maxY = height - pieceHeight; 
         const numberOfPieces = parseInt(this.getAttribute('pieces-number')) || 1;
         const spaceBetweenPieces = parseInt(this.getAttribute('space-between-pieces')) || 0;
+        const puzzleBar = this.getAttribute('puzzle-bar') || 'left';
 
         this.classList.add('captcha');
+        if (puzzleBar === 'right' || puzzleBar === 'left') {
+            this.classList.add('puzzle-bar-lr');
+        } else {
+            this.classList.add('puzzle-bar-tb');
+        }
         this.style.setProperty('--image', `url(${this.getAttribute('src')})`);
         this.style.setProperty('--width', `${width}px`);
         this.style.setProperty('--height', `${height}px`);
@@ -48,17 +54,29 @@ class PuzzleCaptcha extends HTMLElement
             'bottom right',
             'top left',
         ]
+
+        const piecesContainer = this.querySelector('.captcha-pieces-container');
+
         for (let i = 0; i < numberOfPieces; i++) {
+            const pieceContainer = document.createElement('div');
+            pieceContainer.classList.add('piece-container');
+
             const piece = document.createElement('div');
             piece.id = `piece-${i+1}`;
             piece.classList.add('captcha-piece', 'piece-waiting-interaction');
-            this.appendChild(piece);
 
-            let ranges = widthRangesForPieces(width, numberOfPieces, spaceBetweenPieces)[i];
+            pieceContainer.appendChild(piece);
+            piecesContainer.appendChild(pieceContainer);
 
             function onPointerMove(e) {
                 if (!isDragging) return;
-                position.x = clamp(position.x + e.movementX, 0, maxX);
+                piece.style.setProperty('position', 'absolute');
+                if (puzzleBar == 'left' || puzzleBar == 'right') {
+                    position.x = clamp(position.x + e.movementX, 0 - (width - pieceWidth), maxX);
+                } else {
+                    position.x = clamp(position.x + e.movementX, 0, maxX);
+                }
+                // clamp(n, min, max)
                 position.y = clamp(position.y + e.movementY, 0, maxY);
                 piece.style.setProperty('transform', `translate(${position.x}px, ${position.y}px)` )
 
@@ -78,9 +96,18 @@ class PuzzleCaptcha extends HTMLElement
                 input.value = `${position.x}-${position.y}`;
             }
 
-            let position = {x: randomNumberBetween(ranges[0], ranges[1]), y: randomNumberBetween(0, maxY)};
+            // let position = {x: randomNumberBetween(ranges[0], ranges[1]), y: randomNumberBetween(0, maxY)};
 
-            piece.style.setProperty('transform', `translate(${position.x}px, ${position.y}px)`);
+            const containerDomrect = piecesContainer.getBoundingClientRect();
+
+            let rectPiece = piece.getBoundingClientRect();
+            
+            // let position = {x: rectPiece.x - containerDomrect.x, y: rectPiece.y - containerDomrect.y};
+            let position = {x: rectPiece.x - pieceWidth, y: rectPiece.y - containerDomrect.y};
+            // let position = {x: piece., y: 0};
+
+            // piece.style.setProperty('position', 'absolute');
+            // piece.style.setProperty('transform', `translate(${position.x}px, ${position.y}px)`);
             piece.style.setProperty('background-position', `${piecesImagePostition[i]}`);
 
             piece.addEventListener('pointerdown', e => {

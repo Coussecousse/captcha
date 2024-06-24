@@ -202,14 +202,51 @@ h1 {
 	position: relative;
 	margin: 0 auto;
 	border: 2px solid #D1D1D4;
-	width: var(--width);
-	height: var(--height);
-	background: var(--image) center no-repeat;
 	touch-action: none;
+	display: flex;
+	/* width: var(--width);
+	height: var(--height);  */
+}
+.captcha.puzzle-bar-lr {
+	/* width: calc(var(--width) + var(--pieceWidth) + 15px); */
+	/* height: var(--height); */
+}
+.captcha.puzzle-bar-tb {
+	/* width: var(--width); */
+	/* height: calc(var(--height) + var(--pieceHeight) + 15px); */
+}
+.captcha-image {
+	flex: 1;
+	background: var(--image) center no-repeat;
+	height: var(--height);
+	width: var(--width);
 }
 
+.piece-container {
+	display: block;
+	width: var(--pieceWidth);
+	height: var(--pieceHeight);
+}
+
+
+.captcha-pieces-container {
+	/* position: relative;	 */
+	display: flex;
+	gap: 15px;
+	align-items: center;
+}
+.puzzle-bar-tb .captcha-pieces-container {
+	flex-direction: row;
+	height: calc(var(--pieceHeight) + 5px);
+	width: 100%;
+}
+.puzzle-bar-lr .captcha-pieces-container {
+	flex-direction: column;
+	height: 100%;
+	width: calc(var(--pieceWidth) + 5px);
+}
 .captcha-piece {
-	position: absolute;
+	/* position: absolute; */
 	top: 0;
 	left: 0;
 	width: var(--pieceWidth);
