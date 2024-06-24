@@ -115,10 +115,10 @@ class PuzzleChallenge implements CaptchaInterface
         // Allow to generate new positions when a new image is requested
         if (!array_key_exists('verified', $puzzle)) {
             $puzzles = $this->getSession()->get(self::SESSION_KEY, []);
-            foreach ($puzzles as $index => $puzzle) {
-                if ($puzzle['key'] != $key) continue;
-                $puzzle['verified'] = 1;
-                $this->setSessionPuzzles($puzzle);
+            foreach ($puzzles as $index => $challenge) {
+                if ($challenge['key'] != $key) continue;
+                $challenge['verified'] = 1;
+                $this->setSessionPuzzles($challenge);
             } 
         } 
 
