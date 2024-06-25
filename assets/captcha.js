@@ -34,12 +34,32 @@ class PuzzleCaptcha extends HTMLElement
         const spaceBetweenPieces = parseInt(this.getAttribute('space-between-pieces')) || 0;
         const puzzleBar = this.getAttribute('puzzle-bar') || 'left';
 
+
         this.classList.add('captcha');
         if (puzzleBar === 'right' || puzzleBar === 'left') {
             this.classList.add('puzzle-bar-lr');
         } else {
             this.classList.add('puzzle-bar-tb');
         }
+
+        switch (puzzleBar) {
+            case 'left':
+                this.classList.add('puzzle-bar-left');
+                break;
+            case 'right':
+                this.classList.add('puzzle-bar-right');
+                break;
+            case 'top' :
+                this.classList.add('puzzle-bar-top');
+                break;
+            case 'bottom':
+                this.classList.add('puzzle-bar-bottom');
+                break;
+            default : 
+                this.classList.add('puzzle-bar-left');
+                break;
+        }
+
         this.style.setProperty('--image', `url(${this.getAttribute('src')})`);
         this.style.setProperty('--width', `${width}px`);
         this.style.setProperty('--height', `${height}px`);

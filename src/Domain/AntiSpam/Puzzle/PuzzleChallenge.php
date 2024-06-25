@@ -16,7 +16,7 @@ class PuzzleChallenge implements CaptchaInterface
     private const PRECISION = 10;
     public const PIECES_NUMBER = 3;
     public const SPACE_BETWEEN_PIECES = 50;
-    public const PUZZLE_BAR = 'left';
+    public const PUZZLE_BAR = 'top';
 
     public function __construct(private readonly RequestStack $requestStack)
     { }

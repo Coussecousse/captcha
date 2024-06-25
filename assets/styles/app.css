@@ -206,36 +206,32 @@ h1 {
 	/* width: var(--width);
 	height: var(--height);  */
 }
-.captcha.puzzle-bar-lr {
-	/* width: calc(var(--width) + var(--pieceWidth) + 15px); */
-	/* height: var(--height); */
-}
+
 .captcha.puzzle-bar-tb {
-	/* width: var(--width); */
-	/* height: calc(var(--height) + var(--pieceHeight) + 15px); */
+	flex-direction: column;
 }
+
 .captcha-image {
-	flex: 1;
 	background: var(--image) center no-repeat;
 	height: var(--height);
 	width: var(--width);
 }
-
+.puzzle-bar-lr .captcha-image {
+	flex: 1;
+}
 .piece-container {
 	display: block;
 	width: var(--pieceWidth);
 	height: var(--pieceHeight);
 }
 
-
 .captcha-pieces-container {
-	/* position: relative;	 */
 	display: flex;
-	/* gap: 15px; */
 	align-items: center;
+	justify-content: space-evenly;
+	background-color: whitesmoke;
 }
 .puzzle-bar-tb .captcha-pieces-container {
-	flex-direction: row;
 	height: calc(var(--pieceHeight));
 	width: 100%;
 }
@@ -244,6 +240,16 @@ h1 {
 	height: 100%;
 	width: calc(var(--pieceWidth));
 }
+
+.puzzle-bar-left .captcha-pieces-container, 
+.puzzle-bar-top .captcha-pieces-container{
+	order: 1;
+}
+.puzzle-bar-left .captcha-image, 
+.puzzle-bar-top .captcha-image {
+	order: 2;
+}
+
 .captcha-piece {
 	/* position: absolute; */
 	top: 0;
