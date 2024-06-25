@@ -16,6 +16,7 @@ class PuzzleChallenge implements CaptchaInterface
     private const PRECISION = 10;
     public const PIECES_NUMBER = 3;
     public const SPACE_BETWEEN_PIECES = 50;
+    public const PUZZLE_BAR = 'left';
 
     public function __construct(private readonly RequestStack $requestStack)
     { }
@@ -98,7 +99,6 @@ class PuzzleChallenge implements CaptchaInterface
     public function generateKey(): string
     {
         $key = time() + mt_rand(0, 1000);
-        
         $this->generatePuzzle($key);
 
         return $key;
@@ -146,7 +146,7 @@ class PuzzleChallenge implements CaptchaInterface
             }
         }
 
-        // Remove puzzle from session to avoid brute force attack
+        // Remove puzzle from session if no error
         $session = $this->getSession();
         $puzzles = $session->get(self::SESSION_KEY);
         $session->set(self::SESSION_KEY, array_filter($puzzles, fn(array $puzzle) => $puzzle['key'] != $key));
@@ -160,10 +160,6 @@ class PuzzleChallenge implements CaptchaInterface
         foreach ($puzzles as $puzzle) {
             if ($puzzle['key'] != $key) continue;
 
-            // If the key is already verified, we need to generate a new puzzle to avoid brute force attack
-            if (array_key_exists('verified', $puzzle)) {
-                $this->generatePuzzle($key);
-            }
             return $puzzle;
         }
 

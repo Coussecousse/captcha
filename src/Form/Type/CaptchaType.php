@@ -65,6 +65,7 @@ class CaptchaType extends AbstractType
             ]),
             'pieces-number' => PuzzleChallenge::PIECES_NUMBER,
             'space-between-pieces' => PuzzleChallenge::SPACE_BETWEEN_PIECES,
+            'puzzle-bar' => PuzzleChallenge::PUZZLE_BAR
         ];
         
         parent::buildView($view, $form, $options);

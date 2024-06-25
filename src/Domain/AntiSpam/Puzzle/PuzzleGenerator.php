@@ -96,6 +96,13 @@ class PuzzleGenerator implements CaptchaGenerator
             return new Response('No position found', 404);
         }
 
+        // If the key is already verified, we need to generate a new puzzle to avoid brute force attack
+        if (array_key_exists('verified', $puzzle)) {
+            $this->puzzle->generatePuzzle($key);
+            $puzzle = $this->puzzle->getPuzzle($key);
+            $solutions = $puzzle['solutions'];
+        }
+
         $backgroundPath = $this->chosingAPic();
 
         $manager = new ImageManager(['driver' => 'gd']);

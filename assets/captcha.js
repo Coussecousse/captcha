@@ -72,7 +72,7 @@ class PuzzleCaptcha extends HTMLElement
                 if (!isDragging) return;
                 piece.style.setProperty('position', 'absolute');
                 if (puzzleBar == 'left' || puzzleBar == 'right') {
-                    position.x = clamp(position.x + e.movementX, 0 - (width - pieceWidth), maxX);
+                    position.x = clamp(position.x + e.movementX, 0, width );
                 } else {
                     position.x = clamp(position.x + e.movementX, 0, maxX);
                 }
