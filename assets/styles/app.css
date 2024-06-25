@@ -228,7 +228,7 @@ h1 {
 .captcha-pieces-container {
 	display: flex;
 	align-items: center;
-	justify-content: space-evenly;
+	/* justify-content: space-evenly; */
 	background-color: whitesmoke;
 }
 .puzzle-bar-tb .captcha-pieces-container {

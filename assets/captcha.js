@@ -31,7 +31,6 @@ class PuzzleCaptcha extends HTMLElement
         const maxX = width - pieceWidth;
         const maxY = height - pieceHeight; 
         const numberOfPieces = parseInt(this.getAttribute('pieces-number')) || 1;
-        const spaceBetweenPieces = parseInt(this.getAttribute('space-between-pieces')) || 0;
         const puzzleBar = this.getAttribute('puzzle-bar') || 'left';
 
 
@@ -93,11 +92,12 @@ class PuzzleCaptcha extends HTMLElement
                 piece.style.setProperty('position', 'absolute');
                 if (puzzleBar == 'left' || puzzleBar == 'right') {
                     position.x = clamp(position.x + e.movementX, 0, width );
+                    position.y = clamp(position.y + e.movementY, 0, maxY);
                 } else {
                     position.x = clamp(position.x + e.movementX, 0, maxX);
+                    position.y = clamp(position.y + e.movementY, 0, height);
                 }
-                // clamp(n, min, max)
-                position.y = clamp(position.y + e.movementY, 0, maxY);
+
                 piece.style.setProperty('transform', `translate(${position.x}px, ${position.y}px)` )
 
                 let input;
@@ -113,21 +113,30 @@ class PuzzleCaptcha extends HTMLElement
                     default:
                         break;
                 }
-                input.value = `${position.x}-${position.y}`;
+                if (puzzleBar === 'left') {
+                    input.value = `${position.x - pieceWidth}-${position.y}`;
+                } else if (puzzleBar === 'top') {
+                    input.value = `${position.x}-${position.y - pieceHeight}`;
+                } else {
+                    input.value = `${position.x}-${position.y}`;
+                }
             }
-
-            // let position = {x: randomNumberBetween(ranges[0], ranges[1]), y: randomNumberBetween(0, maxY)};
 
             const containerDomrect = piecesContainer.getBoundingClientRect();
 
             let rectPiece = piece.getBoundingClientRect();
             
-            // let position = {x: rectPiece.x - containerDomrect.x, y: rectPiece.y - containerDomrect.y};
-            let position = {x: rectPiece.x - pieceWidth, y: rectPiece.y - containerDomrect.y};
-            // let position = {x: piece., y: 0};
+            let position;
+            if (puzzleBar == 'left') {
+                position = {x: rectPiece.x - containerDomrect.x, y: rectPiece.y - containerDomrect.y};
+            } else if (puzzleBar === 'right') {
+                position = {x: rectPiece.x - pieceWidth, y: rectPiece.y - containerDomrect.y};
+            } else if (puzzleBar === 'top') {
+                position = {x: rectPiece.x - containerDomrect.x, y: rectPiece.y - containerDomrect.y};
+            } else if (puzzleBar === 'bottom') {
+                position = {x: rectPiece.x - containerDomrect.x, y: rectPiece.y};
+            }
 
-            // piece.style.setProperty('position', 'absolute');
-            // piece.style.setProperty('transform', `translate(${position.x}px, ${position.y}px)`);
             piece.style.setProperty('background-position', `${piecesImagePostition[i]}`);
 
             piece.addEventListener('pointerdown', e => {
