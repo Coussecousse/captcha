@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Domain\AntiSpam;
+namespace App\API;
 
 use Symfony\Component\HttpFoundation\Response;
 
-interface CaptchaGenerator
+interface CaptchaImageGeneratorInterface
 {
     public function chosingAPic(): string;
     

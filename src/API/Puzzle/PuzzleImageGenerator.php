@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Domain\AntiSpam\Puzzle;
+namespace App\API\Puzzle;
 
-use App\Domain\AntiSpam\CaptchaGenerator;
+use App\API\CaptchaImageGeneratorInterface;
 use Exception;
 use Intervention\Image\ImageManager;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 
-class PuzzleGenerator implements CaptchaGenerator
+class PuzzleImageGenerator implements CaptchaImageGeneratorInterface
 {
     private $appKernel;
 
-    public function __construct(private readonly PuzzleChallenge $puzzle, KernelInterface $appKernel) {
+    public function __construct(private readonly PuzzleGenerator $puzzle, KernelInterface $appKernel) {
         $this->appKernel = $appKernel;
     }
 
@@ -67,11 +67,11 @@ class PuzzleGenerator implements CaptchaGenerator
         $height = 0;
         if ($value == 'width') {
             $size = $piece->width();
-            $width = intval((PuzzleChallenge::PIECE_WIDTH - $size) / 2);
+            $width = intval((PuzzleGenerator::PIECE_WIDTH - $size) / 2);
             $positions = ['left', 'right'];
         } elseif ($value == 'height') {
             $size = $piece->height();
-            $height = intval((PuzzleChallenge::PIECE_HEIGHT - $size) / 2);
+            $height = intval((PuzzleGenerator::PIECE_HEIGHT - $size) / 2);
             $positions = ['top', 'bottom'];
         }
 
@@ -107,19 +107,19 @@ class PuzzleGenerator implements CaptchaGenerator
 
         $manager = new ImageManager(['driver' => 'gd']);
         $image = $manager->make($backgroundPath);
-        $image->resize(PuzzleChallenge::WIDTH, PuzzleChallenge::HEIGHT);
-        $pieces = $this->getPieces(PuzzleChallenge::PIECES_NUMBER);
+        $image->resize(PuzzleGenerator::WIDTH, PuzzleGenerator::HEIGHT);
+        $pieces = $this->getPieces(PuzzleGenerator::PIECES_NUMBER);
 
         $holes = [];
         
         foreach ($pieces as $index => $piece) {
             $piece = $manager->make($piece);
-            $piece->resize(PuzzleChallenge::PIECE_WIDTH, PuzzleChallenge::PIECE_HEIGHT, function ($constraint) {
+            $piece->resize(PuzzleGenerator::PIECE_WIDTH, PuzzleGenerator::PIECE_HEIGHT, function ($constraint) {
                 $constraint->aspectRatio();
             });
-            if ($piece->height() < PuzzleChallenge::PIECE_HEIGHT) {
+            if ($piece->height() < PuzzleGenerator::PIECE_HEIGHT) {
                 $piece = $this->resizeNecessary($piece, 'height');
-            } else if ($piece->width() < PuzzleChallenge::PIECE_WIDTH) {
+            } else if ($piece->width() < PuzzleGenerator::PIECE_WIDTH) {
                 $piece = $this->resizeNecessary($piece, 'width');
             }
             
@@ -144,14 +144,14 @@ class PuzzleGenerator implements CaptchaGenerator
 
         $image
             ->resizeCanvas(
-                PuzzleChallenge::PIECE_WIDTH,
+                PuzzleGenerator::PIECE_WIDTH,
                 0,
                 'left',
                 true,
                 'rgba(0, 0, 0, 0)'
             )
             ->resizeCanvas(
-                PuzzleChallenge::PIECE_WIDTH,
+                PuzzleGenerator::PIECE_WIDTH,
                 0,
                 'right',
                 true,
@@ -169,7 +169,7 @@ class PuzzleGenerator implements CaptchaGenerator
             $randomPiecePosition = $piecesPositionsInImages[$index];
             $image
                 ->insert($piece, $randomPiecePosition)
-                ->insert($hole->opacity(80), 'top-left', $position[0] + PuzzleChallenge::PIECE_WIDTH, $position[1]);
+                ->insert($hole->opacity(80), 'top-left', $position[0] + PuzzleGenerator::PIECE_WIDTH, $position[1]);
         }
         
         return $image->response('webp');

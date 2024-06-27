@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Domain\AntiSpam\CaptchaInterface;
+use App\API\CaptchaGeneratorInterface;
 use App\Form\RegistrationFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class RegistrationController extends AbstractController
 {
     #[Route(path: '/registration', name: 'app_registration')]
-    public function login(CaptchaInterface $challenge, Request $request): Response
+    public function login(CaptchaGeneratorInterface $challenge, Request $request): Response
     {
         $form = $this->createForm(RegistrationFormType::class);
 

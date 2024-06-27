@@ -2,8 +2,8 @@
 
 namespace App\Form\Type;
 
-use App\Domain\AntiSpam\CaptchaInterface;
-use App\Domain\AntiSpam\Puzzle\PuzzleChallenge;
+use App\API\CaptchaGeneratorInterface;
+use App\API\Puzzle\PuzzleGenerator;
 use App\Validator\Captcha;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 class CaptchaType extends AbstractType
 {
 
-    public function __construct(private readonly CaptchaInterface $challenge, private readonly UrlGeneratorInterface $urlGenerator) {}
+    public function __construct(private readonly CaptchaGeneratorInterface $challenge, private readonly UrlGeneratorInterface $urlGenerator) {}
 
     public function configureOptions(OptionsResolver $resolver): void 
     {
@@ -26,7 +26,8 @@ class CaptchaType extends AbstractType
                 new Captcha()
             ], 
             'error_bubbling' => false,
-            'route' => 'app_captcha',
+            // 'route' => 'app_captcha',
+            'route' => 'app_captcha_api',
         ]);
         parent::configureOptions($resolver);
     }
@@ -42,7 +43,7 @@ class CaptchaType extends AbstractType
             ],
             'data' => $this->challenge->generateKey()
         ]);
-        for ($i = 1; $i <= PuzzleChallenge::PIECES_NUMBER; $i++) {
+        for ($i = 1; $i <= PuzzleGenerator::PIECES_NUMBER; $i++) {
             $builder->add('answer_'.($i), HiddenType::class, [
                 'attr' => [
                     'class' => 'captcha-answer', 
@@ -56,16 +57,16 @@ class CaptchaType extends AbstractType
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         $view->vars['attr'] = [
-            'width' => PuzzleChallenge::WIDTH,
-            'height' => PuzzleChallenge::HEIGHT,
-            'piece-width' => PuzzleChallenge::PIECE_WIDTH,
-            'piece-height' => PuzzleChallenge::PIECE_HEIGHT,
+            'width' => PuzzleGenerator::WIDTH,
+            'height' => PuzzleGenerator::HEIGHT,
+            'piece-width' => PuzzleGenerator::PIECE_WIDTH,
+            'piece-height' => PuzzleGenerator::PIECE_HEIGHT,
             'src' => $this->urlGenerator->generate($options['route'], [
                 'challenge' => $form->get('challenge')->getData()
             ]),
-            'pieces-number' => PuzzleChallenge::PIECES_NUMBER,
-            'space-between-pieces' => PuzzleChallenge::SPACE_BETWEEN_PIECES,
-            'puzzle-bar' => PuzzleChallenge::PUZZLE_BAR
+            'pieces-number' => PuzzleGenerator::PIECES_NUMBER,
+            'space-between-pieces' => PuzzleGenerator::SPACE_BETWEEN_PIECES,
+            'puzzle-bar' => PuzzleGenerator::PUZZLE_BAR
         ];
         
         parent::buildView($view, $form, $options);

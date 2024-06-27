@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Domain\AntiSpam;
+namespace App\API;
 
 /**
  * Interface CaptchaInterface
  * 
  * Generate the captcha puzzle
  */
-interface CaptchaInterface
+interface CaptchaGeneratorInterface
 {
     /**
      * Generate the puzzle for the captcha

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Domain\AntiSpam\Puzzle;
+namespace App\API\Puzzle;
 
-use App\Domain\AntiSpam\CaptchaInterface;
+use App\API\CaptchaGeneratorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-class PuzzleChallenge implements CaptchaInterface
+class PuzzleGenerator implements CaptchaGeneratorInterface
 {
     public const WIDTH = 350;
     public const HEIGHT = 200;

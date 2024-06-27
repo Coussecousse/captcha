@@ -2,13 +2,13 @@
 
 namespace App\Validator;
 
-use App\Domain\AntiSpam\CaptchaInterface;
+use App\API\CaptchaGeneratorInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
 class CaptchaValidator extends ConstraintValidator
 {
-    public function __construct(private readonly CaptchaInterface $captcha)
+    public function __construct(private readonly CaptchaGeneratorInterface $captcha)
     {
         
     }
