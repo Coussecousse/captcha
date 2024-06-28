@@ -41,4 +41,6 @@ interface CaptchaGeneratorInterface
      * @return array|null
      */
     public function getPuzzle(string $key): array | null;
+
+    public function getParams(): array;
 }

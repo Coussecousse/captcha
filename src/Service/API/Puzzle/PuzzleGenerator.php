@@ -79,6 +79,19 @@ class PuzzleGenerator implements CaptchaGeneratorInterface
         return $key;
     }
 
+    public function getParams(): array {
+        return [
+            'width' => $this->width,
+            'height' => $this->height,
+            'pieceWidth' => $this->pieceWidth,
+            'pieceHeight' => $this->pieceHeight,
+            'precision' => $this->precision,
+            'piecesNumber' => $this->piecesNumber,
+            'spaceBetweenPieces' => $this->spaceBetweenPieces,
+            'puzzleBar' => $this->puzzleBar
+        ];
+    }
+
     /**
      * Set the puzzle in the session
      * 

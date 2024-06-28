@@ -2,6 +2,7 @@
 
 namespace App\Service\API;
 
+use App\Entity\Key;
 use Symfony\Component\HttpFoundation\Response;
 
 interface CaptchaImageGeneratorInterface
@@ -10,6 +11,7 @@ interface CaptchaImageGeneratorInterface
     
     public function getPieces(int $number): array;
 
-    public function generateImage(string $key): Response;
+    public function generateImage(Key $key, array $params): Response;
+
 
 }
