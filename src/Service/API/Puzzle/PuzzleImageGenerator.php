@@ -1,8 +1,8 @@
 <?php
 
-namespace App\API\Puzzle;
+namespace App\Service\API\Puzzle;
 
-use App\API\CaptchaImageGeneratorInterface;
+use App\Service\API\CaptchaImageGeneratorInterface;
 use Exception;
 use Intervention\Image\ImageManager;
 use Symfony\Component\Finder\Finder;
@@ -88,7 +88,7 @@ class PuzzleImageGenerator implements CaptchaImageGeneratorInterface
         return $piece;
     } 
 
-    public function generate(string $key): Response {
+    public function generateImage(string $key): Response {
         $puzzle = $this->puzzle->getPuzzle($key);
         $solutions = $puzzle['solutions'];
 

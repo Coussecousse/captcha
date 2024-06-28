@@ -1,6 +1,8 @@
 <?php
 
-namespace App\API;
+namespace App\Service\API;
+
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * Interface CaptchaInterface
@@ -12,10 +14,9 @@ interface CaptchaGeneratorInterface
     /**
      * Generate the puzzle for the captcha
      * 
-     * @param int $key
      * @return void
      */
-    public function generatePuzzle(int $key): void;
+    public function generatePuzzle(): JsonResponse;
 
     /**
      * Generate a key for the captcha

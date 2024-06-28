@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\API\CaptchaGeneratorInterface;
 use App\Form\RegistrationFormType;
+use App\Service\API\CaptchaGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

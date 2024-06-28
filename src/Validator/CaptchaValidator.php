@@ -2,7 +2,7 @@
 
 namespace App\Validator;
 
-use App\API\CaptchaGeneratorInterface;
+use App\Service\API\CaptchaGeneratorInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 

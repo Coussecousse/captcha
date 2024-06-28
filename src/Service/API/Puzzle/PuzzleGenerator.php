@@ -1,58 +1,82 @@
 <?php
 
-namespace App\API\Puzzle;
+namespace App\Service\API\Puzzle;
 
-use App\API\CaptchaGeneratorInterface;
+use App\Entity\Key;
+use App\Entity\Position;
+use App\Service\API\CaptchaGeneratorInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class PuzzleGenerator implements CaptchaGeneratorInterface
 {
-    public const WIDTH = 350;
-    public const HEIGHT = 200;
-    public const PIECE_WIDTH = 50;
-    public const PIECE_HEIGHT = 50;
-    private const SESSION_KEY = 'puzzles';
-    private const PRECISION = 10;
-    public const PIECES_NUMBER = 3;
-    public const SPACE_BETWEEN_PIECES = 50;
-    public const PUZZLE_BAR = 'top';
+    // public const WIDTH = 350;
+    // public const HEIGHT = 200;
+    // public const PIECE_WIDTH = 50;
+    // public const PIECE_HEIGHT = 50;
+    // private const SESSION_KEY = 'puzzles';
+    // private const PRECISION = 10;
+    // public const PIECES_NUMBER = 3;
+    // public const SPACE_BETWEEN_PIECES = 50;
+    // public const PUZZLE_BAR = 'top';
 
-    public function __construct(private readonly RequestStack $requestStack)
+
+    public function __construct (
+        private readonly RequestStack $requestStack,
+        private readonly EntityManagerInterface $entityManager,
+        public int $width, 
+        public int $height,
+        public int $pieceWidth,
+        public int $pieceHeight,
+        public int $precision,
+        public int $piecesNumber,
+        public int $spaceBetweenPieces,
+        public string $puzzleBar
+        )
     { }
 
-    /**
-     * Generate random positions for the pieces
-     * 
-     * @return array
-     */
-    private function generatePositions(): array 
+    public function setRequestStack(RequestStack $requestStack): void
     {
-        $solutions = [];
+        $this->requestStack = $requestStack;
+    }
 
+    /**
+     * Generate random positions for the key
+     * 
+     * @return Key
+     */
+    private function generatePositions(Key $key): Key 
+    {
         $rangesWidth = [];
-        $maxHeight = self::HEIGHT - self::PIECE_HEIGHT;
+        $maxHeight = $this->height - $this->pieceHeight;
         $lastMinWidth = 0;
-        $imageDivision = (self::WIDTH - (self::SPACE_BETWEEN_PIECES * self::PIECES_NUMBER)) / self::PIECES_NUMBER;
+        $imageDivision = ($this->width- ($this->spaceBetweenPieces * $this->piecesNumber)) / $this->piecesNumber;
 
         // Calculate the width ranges for the image for each piece
-        for ($i = 0; $i < self::PIECES_NUMBER; $i++) {
+        for ($i = 0; $i < $this->piecesNumber; $i++) {
             $nextWidth = $lastMinWidth + $imageDivision;
             $rangesWidth[] = [$lastMinWidth, $nextWidth];
-            $lastMinWidth = $nextWidth + self::SPACE_BETWEEN_PIECES;
+            $lastMinWidth = $nextWidth + $this->spaceBetweenPieces;
         }
 
         // Generate positions for each piece
-        while (count($solutions) < self::PIECES_NUMBER) {
-            $piece = 'piece_'.count($solutions) + 1;
-            $currentRange = $rangesWidth[count($solutions)];
+        for ($i = 0; $i < $this->piecesNumber; $i++) {
+            $position = new Position();
+            $currentRange = $rangesWidth[$i];
             $x = mt_rand($currentRange[0], $currentRange[1]);
             $y = mt_rand(0, $maxHeight);
-            $newPosition = [$x, $y];
-            $solutions[] = ['position' => $newPosition, 'piece' => $piece];
+
+            $position->setKey($key)
+                     ->setX($x)
+                     ->setY($y)
+                     ->setPosition("$x-$y");
+            
+            $key->addPosition($position);
         }
         
-        return $solutions;
+        return $key;
     }
 
     /**
@@ -87,13 +111,32 @@ class PuzzleGenerator implements CaptchaGeneratorInterface
         return $puzzle = ['key' => $key, 'solutions' => $solutions];
     }
 
-    public function generatePuzzle(int $key): void
+    public function generatePuzzle(): JsonResponse
     {
-        $solutions = $this->generatePositions();
-        
-        $puzzle = $this->createPuzzle($key, $solutions);
+        // Create a new key entity
+        $key = new Key();
+        dump($key);
 
-        $this->setSessionPuzzles($puzzle);
+        // Generate positions depending on the parameter number of pieces
+        $key = $this->generatePositions($key);
+
+        // Persist the key
+        $this->entityManager->persist($key);
+        $this->entityManager->flush();
+
+        // Send back JSON response about the puzzle for the form
+
+        return new JsonResponse([
+            'key' => $key->getUid(),
+            'piecesNumber' => $this->piecesNumber,
+            'pieceWidth' => $this->pieceWidth,
+            'pieceHeight' => $this->pieceHeight,
+            'imageWidth' => $this->width,
+            'imageHeight' => $this->height,
+            'puzzleBar' => $this->puzzleBar,
+            'spaceBetweenPieces' => $this->spaceBetweenPieces,
+            'precision' => $this->precision
+        ]);
     }
 
     public function generateKey(): string
@@ -137,8 +180,8 @@ class PuzzleGenerator implements CaptchaGeneratorInterface
             }
 
             $isWithinPrecision = (
-                abs($position[0] - $answer[0]) <= self::PRECISION &&
-                abs($position[1] - $answer[1]) <= self::PRECISION
+                abs($position[0] - $answer[0]) <= $this->precision &&
+                abs($position[1] - $answer[1]) <= $this->precision
             );
             
             if (!$isWithinPrecision) {
