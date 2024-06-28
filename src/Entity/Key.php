@@ -21,11 +21,12 @@ class Key
     /**
      * @var Collection<int, Position>
      */
-    #[ORM\OneToMany(targetEntity: Position::class, mappedBy: 'key', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Position::class, mappedBy: 'key', orphanRemoval: true, cascade:['persist'])]
     private Collection $positions;
 
     public function __construct()
     {
+        $this->uid = uniqid();
         $this->positions = new ArrayCollection();
     }
 
