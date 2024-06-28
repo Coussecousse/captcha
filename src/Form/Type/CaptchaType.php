@@ -2,8 +2,7 @@
 
 namespace App\Form\Type;
 
-use App\API\CaptchaGeneratorInterface;
-use App\API\Puzzle\PuzzleGenerator;
+use App\Service\API\CaptchaGeneratorInterface;
 use App\Validator\Captcha;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -13,22 +12,40 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class CaptchaType extends AbstractType
 {
 
-    public function __construct(private readonly CaptchaGeneratorInterface $challenge, private readonly UrlGeneratorInterface $urlGenerator) {}
+    public function __construct(
+        private readonly CaptchaGeneratorInterface $challenge, 
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly HttpClientInterface $httpClient) {
+        }
 
     public function configureOptions(OptionsResolver $resolver): void 
     {
+        // Create a generateKeyService
+        $link = 'http://127.0.0.1:8000/captcha/generatePuzzle';
+
+        $response = $this->httpClient->request('GET', $link); 
+        $response = $response->toArray();
+
+        foreach ($response as $key => $value) {
+            $options[$key] = $value;
+            $resolver->setDefaults([
+                $key => $value
+            ]);
+        }
+
         $resolver->setDefaults([
             'constraints' => [
                 new Captcha()
             ], 
             'error_bubbling' => false,
-            // 'route' => 'app_captcha',
             'route' => 'app_captcha_api',
         ]);
+
         parent::configureOptions($resolver);
     }
 
@@ -41,9 +58,9 @@ class CaptchaType extends AbstractType
             'attr' => [
                 'class' => 'captcha-challenge', 
             ],
-            'data' => $this->challenge->generateKey()
+            'data' => $options['key']
         ]);
-        for ($i = 1; $i <= PuzzleGenerator::PIECES_NUMBER; $i++) {
+        for ($i = 1; $i <= $options['piecesNumber']; $i++) {
             $builder->add('answer_'.($i), HiddenType::class, [
                 'attr' => [
                     'class' => 'captcha-answer', 
@@ -57,16 +74,15 @@ class CaptchaType extends AbstractType
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         $view->vars['attr'] = [
-            'width' => PuzzleGenerator::WIDTH,
-            'height' => PuzzleGenerator::HEIGHT,
-            'piece-width' => PuzzleGenerator::PIECE_WIDTH,
-            'piece-height' => PuzzleGenerator::PIECE_HEIGHT,
+            'width' => $options['imageWidth'],
+            'height' => $options['imageHeight'],
+            'piece-width' => $options['pieceWidth'],
+            'piece-height' => $options['pieceHeight'],
             'src' => $this->urlGenerator->generate($options['route'], [
                 'challenge' => $form->get('challenge')->getData()
             ]),
-            'pieces-number' => PuzzleGenerator::PIECES_NUMBER,
-            'space-between-pieces' => PuzzleGenerator::SPACE_BETWEEN_PIECES,
-            'puzzle-bar' => PuzzleGenerator::PUZZLE_BAR
+            'pieces-number' => $options['piecesNumber'],
+            'puzzle-bar' => $options['puzzleBar']
         ];
         
         parent::buildView($view, $form, $options);
