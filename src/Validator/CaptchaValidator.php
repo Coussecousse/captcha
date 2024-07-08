@@ -34,7 +34,7 @@ class CaptchaValidator extends ConstraintValidator
             }
         }
 
-        if (!$this->captcha->verify($value['challenge'], $answers)) {
+        if (!$this->captcha->verify($value['key'], $answers)) {
             $this->context->buildViolation($constraint->invalidCaptcha)
                 ->addViolation();
         }

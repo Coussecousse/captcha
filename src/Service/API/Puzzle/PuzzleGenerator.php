@@ -12,16 +12,6 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 class PuzzleGenerator implements CaptchaGeneratorInterface
 {
-    // public const WIDTH = 350;
-    // public const HEIGHT = 200;
-    // public const PIECE_WIDTH = 50;
-    // public const PIECE_HEIGHT = 50;
-    // private const SESSION_KEY = 'puzzles';
-    // private const PRECISION = 10;
-    // public const PIECES_NUMBER = 3;
-    // public const SPACE_BETWEEN_PIECES = 50;
-    // public const PUZZLE_BAR = 'top';
-
 
     public function __construct (
         private readonly RequestStack $requestStack,
@@ -81,8 +71,8 @@ class PuzzleGenerator implements CaptchaGeneratorInterface
 
     public function getParams(): array {
         return [
-            'width' => $this->width,
-            'height' => $this->height,
+            'imageWidth' => $this->width,
+            'imageHeight' => $this->height,
             'pieceWidth' => $this->pieceWidth,
             'pieceHeight' => $this->pieceHeight,
             'precision' => $this->precision,
@@ -92,43 +82,11 @@ class PuzzleGenerator implements CaptchaGeneratorInterface
         ];
     }
 
-    /**
-     * Set the puzzle in the session
-     * 
-     * @param array $puzzle
-     * @return void
-     */
-    private function setSessionPuzzles(array $puzzle): void 
-    {
-        $session = $this->getSession();
-
-        $puzzles = $session->get(self::SESSION_KEY, []);
-
-        // if the puzzle in the puzzles array already exist 
-        // we remove it to avoid duplicates
-        $puzzles = array_filter($puzzles, fn(array $p) => $p['key'] != $puzzle['key']);
-
-        $puzzles[] = $puzzle;
-        $session->set(self::SESSION_KEY, array_slice($puzzles,-10));
-    }
-
-    /**
-     * Create the array for the puzzle
-     * 
-     * @param int $key
-     * @param array $solutions
-     * @return array
-     */
-    private function createPuzzle(int $key, array $solutions): array 
-    {
-        return $puzzle = ['key' => $key, 'solutions' => $solutions];
-    }
 
     public function generatePuzzle(): JsonResponse
     {
         // Create a new key entity
         $key = new Key();
-        dump($key);
 
         // Generate positions depending on the parameter number of pieces
         $key = $this->generatePositions($key);
@@ -138,7 +96,6 @@ class PuzzleGenerator implements CaptchaGeneratorInterface
         $this->entityManager->flush();
 
         // Send back JSON response about the puzzle for the form
-
         return new JsonResponse([
             'key' => $key->getUid(),
             'piecesNumber' => $this->piecesNumber,
@@ -152,79 +109,52 @@ class PuzzleGenerator implements CaptchaGeneratorInterface
         ]);
     }
 
-    public function generateKey(): string
-    {
-        $key = time() + mt_rand(0, 1000);
-        $this->generatePuzzle($key);
-
-        return $key;
-    }
-
     public function verify(string $key, array $answers): bool
     {
-        $puzzle = $this->getPuzzle($key);
+        $key = $this->entityManager->getRepository(Key::class)->findOneBy(['uid' => $key]);
 
-        if (!$puzzle) return false;
-
-        // The key is verified a first time
-        // To avoid brute force attack, we need to add a field to say that we already verify it
-        // Allow to generate new positions when a new image is requested
-        if (!array_key_exists('verified', $puzzle)) {
-            $puzzles = $this->getSession()->get(self::SESSION_KEY, []);
-            foreach ($puzzles as $index => $challenge) {
-                if ($challenge['key'] != $key) continue;
-                $challenge['verified'] = 1;
-                $this->setSessionPuzzles($challenge);
-            } 
-        } 
+        if (!$key) return false;
 
         $got = $this->stringToPosition($answers);
 
-        $solutions = $puzzle['solutions'];
+        $keyPositions = $key->getPositions();
 
         foreach($got as $index => $answer) {
-            $position = array_filter($solutions, function($item) use ($index) {
-                return $item['piece'] == 'piece_'.$index + 1;
-            });
-            
-            if (!empty($position)) {
-                $position = reset($position);
-                $position = $position['position'];
-            }
+            $position = $keyPositions[$index];
 
             $isWithinPrecision = (
-                abs($position[0] - $answer[0]) <= $this->precision &&
-                abs($position[1] - $answer[1]) <= $this->precision
+                abs($position->getX() - $answer[0]) <= $this->precision &&
+                abs($position->getY() - $answer[1]) <= $this->precision
             );
             
             if (!$isWithinPrecision) {
+
+                // Generate new position for the key to avoid brute force attack
+                $positions = $key->getPositions(); 
+                foreach ($positions as $position) {
+                    $this->entityManager->remove($position, true);
+                }
+                $this->entityManager->flush();
+
+                $key = $this->generatePositions($key);
+
+                $this->entityManager->persist($key);
+                $this->entityManager->flush();
+
                 return false;
             }
         }
 
-        // Remove puzzle from session if no error
-        $session = $this->getSession();
-        $puzzles = $session->get(self::SESSION_KEY);
-        $session->set(self::SESSION_KEY, array_filter($puzzles, fn(array $puzzle) => $puzzle['key'] != $key));
+        // Remove the key from the database
+        $this->entityManager->remove($key);
+        $this->entityManager->flush();
+
+        // Remove the key from the session
+        $session = $this->requestStack->getSession();
+
+        $session->remove('captcha_puzzle');
 
         return true;
-    }
-
-    public function getPuzzle(string $key): array | null
-    {
-        $puzzles = $this->getSession()->get(self::SESSION_KEY, []);
-        foreach ($puzzles as $puzzle) {
-            if ($puzzle['key'] != $key) continue;
-
-            return $puzzle;
-        }
-
-        return null;
-    }
-
-    private function getSession(): Session
-    {
-        return $this->requestStack->getMainRequest()->getSession();
     }
 
     /**

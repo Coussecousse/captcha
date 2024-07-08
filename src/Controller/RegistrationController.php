@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class RegistrationController extends AbstractController
 {
     #[Route(path: '/registration', name: 'app_registration')]
-    public function login(CaptchaGeneratorInterface $challenge, Request $request): Response
+    public function login(Request $request): Response
     {
         $form = $this->createForm(RegistrationFormType::class);
 

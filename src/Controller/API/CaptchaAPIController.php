@@ -22,7 +22,7 @@ class CaptchaAPIController extends AbstractController
     {
 
         $params = $request->query->all();
-        $challenge = $params['challenge'] ?? null;
+        $challenge = $params['key'] ?? null;
 
         if (!$challenge) {
             return new Exception('No challenge provided.');
@@ -37,7 +37,7 @@ class CaptchaAPIController extends AbstractController
         }
 
         $params = $puzzleGenerator->getParams();
-        
+
         return $imageGenerator->generateImage($key, $params);
     }
 
@@ -46,5 +46,12 @@ class CaptchaAPIController extends AbstractController
         $puzzle = $puzzleGenerator->generatePuzzle();
 
         return $puzzle;
+    }
+   
+    #[Route('/captcha/getParams', name:'app_captcha_api_get_params')]
+    public function getParams(PuzzleGenerator $puzzleGenerator): JsonResponse {
+        $params = $puzzleGenerator->getParams();
+
+        return new JsonResponse($params);
     }
 }

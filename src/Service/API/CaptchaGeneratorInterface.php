@@ -19,13 +19,6 @@ interface CaptchaGeneratorInterface
     public function generatePuzzle(): JsonResponse;
 
     /**
-     * Generate a key for the captcha
-     * 
-     * @return string
-     */
-    public function generateKey(): string;
-
-    /**
      * Verify the answers to the captcha
      * 
      * @param string $key
@@ -34,13 +27,6 @@ interface CaptchaGeneratorInterface
      */
     public function verify(string $key, array $answers): bool;
 
-    /**
-     * Get the puzzle from the key
-     * 
-     * @param string $key
-     * @return array|null
-     */
-    public function getPuzzle(string $key): array | null;
 
     public function getParams(): array;
 }

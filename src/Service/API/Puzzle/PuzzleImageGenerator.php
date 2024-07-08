@@ -106,7 +106,7 @@ class PuzzleImageGenerator implements CaptchaImageGeneratorInterface
         $manager = new ImageManager(['driver' => 'gd']);
         $image = $manager->make($backgroundPath);
         dump($params);
-        $image->resize($params['width'], $params['height']);
+        $image->resize($params['imageWidth'], $params['imageHeight']);
         $pieces = $this->getPieces($params['piecesNumber']);
 
         $holes = [];
@@ -117,9 +117,9 @@ class PuzzleImageGenerator implements CaptchaImageGeneratorInterface
             $piece->resize($params['pieceWidth'], $params['pieceHeight'], function ($constraint) {
                 $constraint->aspectRatio();
             });
-            if ($piece->height() < $params['height']) {
+            if ($piece->height() < $params['imageHeight']) {
                 $piece = $this->resizeNecessary($piece, 'height', $params);
-            } else if ($piece->width() < $params['width']) {
+            } else if ($piece->width() < $params['imageWidth']) {
                 $piece = $this->resizeNecessary($piece, 'width', $params);
             }
             

@@ -113,6 +113,7 @@ class PuzzleCaptcha extends HTMLElement
                     default:
                         break;
                 }
+                
                 if (puzzleBar === 'left') {
                     input.value = `${position.x - pieceWidth}-${position.y}`;
                 } else if (puzzleBar === 'top') {
