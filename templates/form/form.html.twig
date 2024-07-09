@@ -1,10 +1,9 @@
 {% block captcha_row %}
-<div class="form-group">
-    <puzzle-captcha 
-        {% for attrname, attrvalue in attr %}
-            {{ ( " " ~ attrname ~ "=\"" ~ attrvalue ~ "\"" )|raw('html') }}
-        {% endfor %}
-    >
+<puzzle-captcha 
+    {% for attrname, attrvalue in attr %}
+        {{ ( " " ~ attrname ~ "=\"" ~ attrvalue ~ "\"" )|raw('html') }}
+    {% endfor %}
+>
     <div class="captcha-image"></div>
 
     <div class="captcha-pieces-container">    
@@ -12,10 +11,5 @@
             {{ form_widget(child) }}
         {% endfor %}
     </div>
-    </puzzle-captcha>
-    <div class="form__error">
-        {{ form_errors(form) }}
-    </div>
-</div>
-
+</puzzle-captcha>
 {% endblock %}

@@ -30,6 +30,12 @@
 					{{ form_widget(form.password) }}
 					{{ form_errors(form.password) }}
 				</div>
+				<div class="form-group">
+					{{ form_row(form.captcha) }}
+					<div class="form__error">
+						{{ form_errors(form.captcha) }}
+					</div>	
+				</div>
 				{{ form_rest(form) }}
 				<button class="button login__submit" type="submit">
 					<span class="button__text">S'inscrire</span>
