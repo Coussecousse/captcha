@@ -24,6 +24,10 @@ class Key
     #[ORM\OneToMany(targetEntity: Position::class, mappedBy: 'key', orphanRemoval: true, cascade:['persist'])]
     private Collection $positions;
 
+    // Key.php
+    #[ORM\OneToOne(mappedBy: 'key', cascade: ['persist', 'remove'])]
+    private ?Puzzle $puzzle = null;
+
     public function __construct()
     {
         $this->uid = uniqid();
@@ -73,6 +77,23 @@ class Key
                 $position->setKey(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPuzzle(): ?Puzzle
+    {
+        return $this->puzzle;
+    }
+
+    public function setPuzzle(Puzzle $puzzle): static
+    {
+        // set the owning side of the relation if necessary
+        if ($puzzle->getKey() !== $this) {
+            $puzzle->setKey($this);
+        }
+
+        $this->puzzle = $puzzle;
 
         return $this;
     }
