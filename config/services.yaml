@@ -22,15 +22,5 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    App\Service\API\Puzzle\PuzzleGenerator:
-        arguments:
-            $width: 350
-            $height: 200
-            $pieceWidth: 50
-            $pieceHeight: 50
-            $precision: 10
-            $piecesNumber: 3
-            $spaceBetweenPieces: 50
-            $puzzleBar: 'top'
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
