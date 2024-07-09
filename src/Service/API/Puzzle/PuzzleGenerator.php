@@ -137,7 +137,7 @@ class PuzzleGenerator implements CaptchaGeneratorInterface
         ]);
     }
 
-    public function verify(string $key, array $answers): bool
+    public function verify(string $key, array $answers): JsonResponse
     {
         $key = $this->entityManager->getRepository(Key::class)->findOneBy(['uid' => $key]);
         $puzzle = $key->getPuzzle();
@@ -170,7 +170,7 @@ class PuzzleGenerator implements CaptchaGeneratorInterface
                 $this->entityManager->persist($key);
                 $this->entityManager->flush();
 
-                return false;
+                return new JsonResponse(['valid' => false]);
             }
         }
 
@@ -183,7 +183,7 @@ class PuzzleGenerator implements CaptchaGeneratorInterface
 
         $session->remove('captcha_puzzle');
 
-        return true;
+        return new JsonResponse(['valid' => true]);
     }
 
     /**

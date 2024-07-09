@@ -26,7 +26,7 @@ interface CaptchaGeneratorInterface
      * @param array $answers
      * @return bool
      */
-    public function verify(string $key, array $answers): bool;
+    public function verify(string $key, array $answers): JsonResponse;
 
 
     public function getParams(Puzzle $puzzle): JsonResponse;

@@ -44,7 +44,7 @@ class CaptchaType extends AbstractType
 
         if (!$session->has('captcha_puzzle') || $this->requestStack->getCurrentRequest()->getMethod() === 'GET') {
             
-            // Create a generateKeyService
+            // Create a key by asking the API
             $link = 'http://127.0.0.1:8000/captcha/generatePuzzle';
 
             $link = $link . '?' . http_build_query($puzzleOptions);

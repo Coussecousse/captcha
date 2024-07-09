@@ -5,10 +5,14 @@ namespace App\Validator;
 use App\Service\API\CaptchaGeneratorInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class CaptchaValidator extends ConstraintValidator
 {
-    public function __construct(private readonly CaptchaGeneratorInterface $captcha)
+    public function __construct(
+        private readonly CaptchaGeneratorInterface $captcha,
+        private readonly HttpClientInterface $httpClient
+        )
     {
         
     }
@@ -34,7 +38,16 @@ class CaptchaValidator extends ConstraintValidator
             }
         }
 
-        if (!$this->captcha->verify($value['key'], $answers)) {
+        $params = [
+            'key' => $value['key'],
+            'answers' => $answers
+        ];
+        $link = 'http://127.0.0.1:8000/captcha/verify?' . http_build_query($params);
+
+        $response = $this->httpClient->request('GET', $link);
+        $response = $response->toArray();
+
+        if (!$response['valid']) {
             $this->context->buildViolation($constraint->invalidCaptcha)
                 ->addViolation();
         }

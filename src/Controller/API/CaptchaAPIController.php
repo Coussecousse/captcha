@@ -28,7 +28,6 @@ class CaptchaAPIController extends AbstractController
             return new Exception('No challenge provided.');
         }
 
-
         $key = $keyRepository->findOneBy(['uid' => $challenge]);
 
         if (!$key) 
@@ -61,5 +60,13 @@ class CaptchaAPIController extends AbstractController
         }
 
         return $puzzleGenerator->getParams($puzzle);
+    }
+
+    #[Route('/captcha/verify', name:'app_captcha_api_verify')]
+    public function verify(Request $request, PuzzleGenerator $puzzleGenerator): JsonResponse
+    {
+        $params = $request->query->all();
+
+        return $puzzleGenerator->verify($params['key'], $params['answers']);
     }
 }
