@@ -2,6 +2,7 @@
 
 namespace App\Service\API;
 
+use App\Entity\Puzzle;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
@@ -16,7 +17,7 @@ interface CaptchaGeneratorInterface
      * 
      * @return void
      */
-    public function generatePuzzle(): JsonResponse;
+    public function generatePuzzle(array $params): JsonResponse;
 
     /**
      * Verify the answers to the captcha
@@ -28,5 +29,5 @@ interface CaptchaGeneratorInterface
     public function verify(string $key, array $answers): bool;
 
 
-    public function getParams(): array;
+    public function getParams(Puzzle $puzzle): JsonResponse;
 }

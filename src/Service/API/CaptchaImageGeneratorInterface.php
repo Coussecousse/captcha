@@ -11,7 +11,5 @@ interface CaptchaImageGeneratorInterface
     
     public function getPieces(int $number): array;
 
-    public function generateImage(Key $key, array $params): Response;
-
-
+    public function generateImage(Key $key): Response;
 }

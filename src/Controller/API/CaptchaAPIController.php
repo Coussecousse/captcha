@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\Repository\KeyRepository;
+use App\Repository\PuzzleRepository;
 use App\Service\API\Puzzle\PuzzleGenerator;
 use App\Service\API\Puzzle\PuzzleImageGenerator;
 use Exception;
@@ -17,7 +18,6 @@ class CaptchaAPIController extends AbstractController
     #[Route('/captcha/api', name: 'app_captcha_api')]
     public function index(Request $request, 
         PuzzleImageGenerator $imageGenerator,
-        PuzzleGenerator $puzzleGenerator,
         KeyRepository $keyRepository): Response
     {
 
@@ -36,22 +36,30 @@ class CaptchaAPIController extends AbstractController
             return new Exception('No challenge found.');
         }
 
-        $params = $puzzleGenerator->getParams();
-
-        return $imageGenerator->generateImage($key, $params);
+        return $imageGenerator->generateImage($key);
     }
 
     #[Route('/captcha/generatePuzzle', name:'app_captcha_api_generate_key')]
-    public function generatePuzzle(PuzzleGenerator $puzzleGenerator): JsonResponse  {
-        $puzzle = $puzzleGenerator->generatePuzzle();
+    public function generatePuzzle(PuzzleGenerator $puzzleGenerator, Request $request): JsonResponse  {
+        $params = $request->query->all();
+        $puzzle = $puzzleGenerator->generatePuzzle($params);
 
         return $puzzle;
     }
    
-    #[Route('/captcha/getParams', name:'app_captcha_api_get_params')]
-    public function getParams(PuzzleGenerator $puzzleGenerator): JsonResponse {
-        $params = $puzzleGenerator->getParams();
+    #[Route('/captcha/getPuzzle', name:'app_captcha_api_get_puzzle')]
+    public function getPuzzle(Request $request, 
+        KeyRepository $keyRepository,
+        PuzzleRepository $puzzleRepository,
+        PuzzleGenerator $puzzleGenerator): JsonResponse {
+        $uid = $request->query->get('key');
+        $key = $keyRepository->findOneBy(['uid' => $uid]);
+        $puzzle = $puzzleRepository->findOneBy(['key' => $key]);
 
-        return new JsonResponse($params);
+        if (!$puzzle) {
+            return new Exception('No puzzle found.');
+        }
+
+        return $puzzleGenerator->getParams($puzzle);
     }
 }

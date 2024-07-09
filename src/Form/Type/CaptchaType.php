@@ -27,6 +27,18 @@ class CaptchaType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void 
     {
+
+        $puzzleOptions = [
+            'imageWidth' => 350,
+            'imageHeight' => 200,
+            'pieceWidth' => 50,
+            'pieceHeight' => 50,
+            'piecesNumber' => 3,
+            'puzzleBar' => 'bottom',
+            'spaceBetweenPieces' => 50,
+            'precision' => 10
+        ];
+
         // Set the key in the session to avoid new key regeneration
         $session = $this->requestStack->getSession();
 
@@ -34,6 +46,8 @@ class CaptchaType extends AbstractType
             
             // Create a generateKeyService
             $link = 'http://127.0.0.1:8000/captcha/generatePuzzle';
+
+            $link = $link . '?' . http_build_query($puzzleOptions);
             
             $response = $this->httpClient->request('GET', $link); 
             $response = $response->toArray();
@@ -45,30 +59,35 @@ class CaptchaType extends AbstractType
             $session->set('captcha_puzzle', $puzzleSession); 
         } else {
             // Should get the puzzle without generate a new one
-            $link = 'http://127.0.0.1:8000/captcha/getParams';
+            $key = $session->get('captcha_puzzle')['key'];
+
+            $link = 'http://127.0.0.1:8000/captcha/getPuzzle';
+            $link = $link . "?key=" . $key;
 
             $params = $this->httpClient->request('GET', $link);
             $params = $params->toArray();
 
-            $key = $session->get('captcha_puzzle')['key'];
 
             $response = [...$params, 'key' => $key];
         }
         
-        foreach ($response as $key => $value) {
-            $options[$key] = $value;
-            $resolver->setDefaults([
-                $key => $value
-            ]);
-        }
-
         $resolver->setDefaults([
+            'key' => $response['key'],
             'constraints' => [
                 new Captcha()
             ], 
             'error_bubbling' => false,
             'route' => 'app_captcha_api',
+            ... $puzzleOptions
         ]);
+        
+        foreach ($response as $key => $value) {
+            $options[$key] = $value;
+            $resolver->setDefaults([
+                $key => $value,
+
+            ]);
+        }
 
         parent::configureOptions($resolver);
     }

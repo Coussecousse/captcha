@@ -3,6 +3,7 @@
 namespace App\Service\API\Puzzle;
 
 use App\Entity\Key;
+use App\Entity\Puzzle;
 use App\Service\API\CaptchaImageGeneratorInterface;
 use Exception;
 use Intervention\Image\ImageManager;
@@ -61,18 +62,18 @@ class PuzzleImageGenerator implements CaptchaImageGeneratorInterface
         return $pieces;
     }
 
-    public function resizeNecessary($piece, string $value = 'width', $params) {
+    private function resizeNecessary($piece, string $value = 'width', Puzzle $puzzle) {
         $size = 0;
         $positions = [];
         $width = 0;
         $height = 0;
         if ($value == 'width') {
             $size = $piece->width();
-            $width = intval(($params['pieceWidth'] - $size) / 2);
+            $width = intval(($puzzle->getPieceWidth() - $size) / 2);
             $positions = ['left', 'right'];
         } elseif ($value == 'height') {
             $size = $piece->height();
-            $height = intval(($params['pieceHeight'] - $size) / 2);
+            $height = intval(($puzzle->getPieceHeight() - $size) / 2);
             $positions = ['top', 'bottom'];
         }
 
@@ -89,47 +90,38 @@ class PuzzleImageGenerator implements CaptchaImageGeneratorInterface
         return $piece;
     } 
 
-    public function generateImage(Key $key, array $params): Response {
+    public function generateImage(Key $key): Response {
         $positions = $key->getPositions();
+        $puzzle = $key->getPuzzle();
 
         if ($positions->isEmpty()) {
             return new Response('No position found', 404);
         }
-
-        // TODO
-        // Add column verified to the key to generate new positions if needed
-
 
         $backgroundPath = $this->chosingAPic();
         
         // Make the image
         $manager = new ImageManager(['driver' => 'gd']);
         $image = $manager->make($backgroundPath);
-        dump($params);
-        $image->resize($params['imageWidth'], $params['imageHeight']);
-        $pieces = $this->getPieces($params['piecesNumber']);
+        $image->resize($puzzle->getWidth(), $puzzle->getHeight());
+        $pieces = $this->getPieces($puzzle->getPiecesNumber());
 
         $holes = [];
 
 
         foreach ($pieces as $index => $piece) {
             $piece = $manager->make($piece);
-            $piece->resize($params['pieceWidth'], $params['pieceHeight'], function ($constraint) {
+            $piece->resize($puzzle->getPieceWidth(), $puzzle->getPieceHeight(), function ($constraint) {
                 $constraint->aspectRatio();
             });
-            if ($piece->height() < $params['imageHeight']) {
-                $piece = $this->resizeNecessary($piece, 'height', $params);
-            } else if ($piece->width() < $params['imageWidth']) {
-                $piece = $this->resizeNecessary($piece, 'width', $params);
+            if ($piece->height() < $puzzle->getHeight()) {
+                $piece = $this->resizeNecessary($piece, 'height', $puzzle);
+            } else if ($piece->width() < $puzzle->getWidth()) {
+                $piece = $this->resizeNecessary($piece, 'width', $puzzle);
             }
             
             $hole = clone $piece;
             $hole->opacity(80);
-
-            // In case we want to add an halo to the hole
-            // $halo = $manager->make($halos[$index]);
-            // $halo->fit(PuzzleChallenge::PIECE_WIDTH, PuzzleChallenge::PIECE_HEIGHT);
-            // $hole->insert($halo, 'top-left', 0, 0);
 
             $position = $positions[$index];
 
@@ -144,14 +136,14 @@ class PuzzleImageGenerator implements CaptchaImageGeneratorInterface
 
         $image
             ->resizeCanvas(
-                $params['pieceWidth'],
+                $puzzle->getPieceWidth(),
                 0,
                 'left',
                 true,
                 'rgba(0, 0, 0, 0)'
             )
             ->resizeCanvas(
-                $params['pieceWidth'],
+                $puzzle->getPieceHeight(),
                 0,
                 'right',
                 true,
@@ -167,10 +159,11 @@ class PuzzleImageGenerator implements CaptchaImageGeneratorInterface
             $hole = $holes[$index];
 
             $randomPiecePosition = $piecesPositionsInImages[$index];
+
             $image
                 ->insert($piece, $randomPiecePosition)
-                ->insert($hole->opacity(80), 'top-left', $position->getX() + $params['pieceWidth'], $position->getY());
-        }
+                ->insert($hole->opacity(80), 'top-left', $position->getX() + $puzzle->getPieceWidth(), $position->getY());
+        }                
         
         return $image->response('webp');
     }
