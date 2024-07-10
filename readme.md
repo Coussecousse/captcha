@@ -44,7 +44,7 @@ $puzzleOptions = [
 ```yaml
 twig:
     form_themes:
-        - 'form/form.html.twig'
+        - 'captcha/form.html.twig'
     file_name_pattern: '*.twig'
 ```
 
