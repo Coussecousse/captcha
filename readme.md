@@ -4,7 +4,7 @@
 Le but de ce captcha est de générer jusqu'à 3 pièces de puzzle différentes sur une image et d'inviter l'utilisateur à reconstruire le puzzle pour s'assurer qu'il est humain.
 Cette solution sera proposée en SaaS et devra pouvoir être intégré dans un module Drupal.
 
-### Fonctionnement : 
+## Fonctionnement : 
 
 ### Côté client : 
     - Le captchaType (field rattaché à un formulaire)
